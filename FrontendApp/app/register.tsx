@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
-import axios, { AxiosError } from 'axios';
-import styles from './RegisterScreenStyles';
+import { useRouter } from 'expo-router';
+import axios from 'axios';
+import styles from './styles/RegisterScreenStyles';
 
-const RegisterScreen = () => {
+const RegisterScreen: React.FC = () => {
+  const router = useRouter();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [username, setUsername] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState<string>('');
+  const [error, setError] = useState('');
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
@@ -29,19 +31,11 @@ const RegisterScreen = () => {
 
       if (response.status === 201) {
         console.log('User registered:', response.data.user);
-        // Here route to next Screen
+        router.push('/login');
       }
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        setError(error.response ? error.response.data.message : 'Unknown error');
-      } else {
-        setError('Unknown error');
-      }
+    } catch (err) {
+      setError('Error registering user');
     }
-  };
-
-  const handleLogin = () => {
-    console.log('Navigate to Login Screen');
   };
 
   return (
@@ -92,7 +86,7 @@ const RegisterScreen = () => {
 
       <Button title="Register" onPress={handleRegister} />
 
-      <TouchableOpacity onPress={handleLogin}>
+      <TouchableOpacity onPress={() => router.push('/login')}>
         <Text style={styles.loginText}>
           Already have an account? <Text style={styles.loginLink}>Login</Text>
         </Text>
