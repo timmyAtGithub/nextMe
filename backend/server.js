@@ -1,14 +1,14 @@
 const express = require('express');
 const dotenv = require('dotenv');
-const pg = require('pg');
+const { Pool } = require('pg');
+const cors = require('cors');
 
-// Umgebungsvariablen laden
 dotenv.config();
 const app = express();
 app.use(express.json());
+app.use(cors());
 
-// PostgreSQL Verbindung
-const pool = new pg.Pool({
+const pool = new Pool({
   user: process.env.DB_USER,
   host: process.env.DB_HOST,
   database: process.env.DB_NAME,
@@ -16,11 +16,23 @@ const pool = new pg.Pool({
   port: process.env.DB_PORT,
 });
 
-// Test-Route
+console.log('Datenbankverbindung erfolgreich');
+
+module.exports = pool; 
+
 app.get('/', async (req, res) => {
-  const result = await pool.query('SELECT NOW()');
-  res.send(result.rows[0]);
+  try {
+    const result = await pool.query('SELECT NOW()'); 
+    res.json(result.rows[0]);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Server Error');
+  }
 });
 
-// Server starten
-app.listen(5000, () => console.log('Server läuft auf Port 5000'));
+
+const authRoutes = require('./routes/authRoutes');
+app.use('/api/auth', authRoutes);
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
