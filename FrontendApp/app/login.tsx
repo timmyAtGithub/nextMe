@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native'; 
-import axios from 'axios';  
-import styles from './LoginScreenStyles';
+import { useRouter } from 'expo-router';
+import axios from 'axios';
+import styles from './styles/LoginScreenStyles';
 
-const LoginScreen = () => {
-  const navigation = useNavigation(); 
+const LoginScreen: React.FC = () => {
+  const router = useRouter();
 
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');  
+  const [error, setError] = useState('');
 
   const handleLogin = async () => {
     if (!username || !password) {
@@ -25,7 +25,7 @@ const LoginScreen = () => {
 
       if (response.status === 200) {
         console.log('Login successful:', response.data);
-        // Here route to next Screen
+        router.push('/chats');
       }
     } catch (err) {
       console.error(err);
@@ -34,13 +34,13 @@ const LoginScreen = () => {
   };
 
   const handleRegister = () => {
-    navigation.navigate('Register'); 
+    router.push('/register');
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Login</Text>
-      {error && <Text style={{ color: 'red' }}>{error}</Text>}  {}
+      {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
       <TextInput
         style={styles.input}
