@@ -1,22 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
 
-const chats = [
-  { id: '1', name: 'Markus', message: "That's great", time: '10:05 AM' },
-  { id: '2', name: 'Luna', message: 'Okay see ya!', time: '10:04 AM' },
-];
-
 const ChatOverview: React.FC = () => {
+  const [chats, setChats] = useState([]);
   const router = useRouter();
 
-  const renderChat = ({ item }: { item: { id: string; name: string; message: string; time: string } }) => (
+  useEffect(() => {
+    const fetchChats = async () => {
+      try {
+        const response = await fetch('http://localhost:5000/api/chats/1'); // Beispiel-Benutzer-ID
+        const data = await response.json();
+        setChats(data);
+      } catch (error) {
+        console.error('Error fetching chats:', error);
+      }
+    };
+
+    fetchChats();
+  }, []);
+
+  const renderChat = ({ item }: { item: { id: string; name: string; lastMessage: string; time: string } }) => (
     <TouchableOpacity
       style={styles.chatItem}
       onPress={() => router.push(`/chats/${item.id}`)}
     >
       <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.message}>{item.message}</Text>
+      <Text style={styles.message}>{item.lastMessage}</Text>
       <Text style={styles.time}>{item.time}</Text>
     </TouchableOpacity>
   );
@@ -25,7 +35,7 @@ const ChatOverview: React.FC = () => {
     <FlatList
       data={chats}
       renderItem={renderChat}
-      keyExtractor={(item) => item.id}
+      keyExtractor={(item) => item.id.toString()}
       contentContainerStyle={styles.container}
     />
   );

@@ -1,19 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
 
 const ChatPerson: React.FC = () => {
-  const { chatId } = useLocalSearchParams(); // Holen des `chatId`-Parameters aus der URL
-  const [messages, setMessages] = useState([
-    { id: '1', text: 'Hey, how are you?', fromMe: false },
-    { id: '2', text: 'I am good, thanks!', fromMe: true },
-  ]);
+  const { chatId } = useLocalSearchParams();
+  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
 
-  const sendMessage = () => {
+  
+  useEffect(() => {
+    const fetchMessages = async () => {
+      try {
+        const response = await fetch(`http://localhost:5000/api/chats/messages/${chatId}`);
+        const data = await response.json();
+        setMessages(data);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
+  }, [chatId]);
+
+
+  const sendMessage = async () => {
     if (newMessage.trim()) {
-      setMessages([...messages, { id: Date.now().toString(), text: newMessage, fromMe: true }]);
-      setNewMessage('');
+      try {
+        const response = await fetch('http://localhost:5000/api/chats/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chatId, senderId: 1, text: newMessage }), 
+        });
+
+        const data = await response.json();
+        setMessages([...messages, data]);
+        setNewMessage('');
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
     }
   };
 
@@ -23,9 +47,9 @@ const ChatPerson: React.FC = () => {
       <FlatList
         data={messages}
         renderItem={({ item }) => (
-          <Text style={item.fromMe ? styles.myMessage : styles.theirMessage}>{item.text}</Text>
+          <Text style={item.sender_id === 1 ? styles.myMessage : styles.theirMessage}>{item.text}</Text>
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
       />
       <View style={styles.inputContainer}>
         <TextInput
