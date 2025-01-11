@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, FlatList, StyleSheet } from 'react-native';
 import { useLocalSearchParams } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ChatPerson: React.FC = () => {
   const { chatId } = useLocalSearchParams();
@@ -26,12 +27,16 @@ const ChatPerson: React.FC = () => {
   const sendMessage = async () => {
     if (newMessage.trim()) {
       try {
+        const token = await AsyncStorage.getItem('token');
         const response = await fetch('http://localhost:5000/api/chats/messages', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chatId, senderId: 1, text: newMessage }), 
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ chatId, text: newMessage }), 
         });
-
+  
         const data = await response.json();
         setMessages([...messages, data]);
         setNewMessage('');
@@ -40,6 +45,7 @@ const ChatPerson: React.FC = () => {
       }
     }
   };
+  
 
   return (
     <View style={styles.container}>

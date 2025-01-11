@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, FlatList, TouchableOpacity, StyleSheet, Text } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import Header from '../Components/Header';
+import BottomNavigation from '../Components/BottomNavigation';
 
 const ChatOverview: React.FC = () => {
   const [chats, setChats] = useState([]);
@@ -9,7 +12,13 @@ const ChatOverview: React.FC = () => {
   useEffect(() => {
     const fetchChats = async () => {
       try {
-        const response = await fetch('http://localhost:5000/api/chats/1'); // Beispiel-Benutzer-ID
+        const token = await AsyncStorage.getItem('token'); 
+        const response = await fetch('http://localhost:5000/api/chats/me', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
         const data = await response.json();
         setChats(data);
       } catch (error) {
@@ -32,19 +41,24 @@ const ChatOverview: React.FC = () => {
   );
 
   return (
-    <FlatList
-      data={chats}
-      renderItem={renderChat}
-      keyExtractor={(item) => item.id.toString()}
-      contentContainerStyle={styles.container}
-    />
+    <View style={styles.container}>
+      <Header />
+      <FlatList
+        data={chats}
+        renderItem={renderChat}
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={styles.listContainer}
+      />
+      <BottomNavigation />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: { padding: 10 },
+  container: { flex: 1, backgroundColor: '#1E1E1E' },
+  listContainer: { padding: 10 },
   chatItem: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 15 },
-  name: { fontWeight: 'bold', fontSize: 16 },
+  name: { fontWeight: 'bold', fontSize: 16, color: '#FFF' },
   message: { color: 'gray', flex: 1 },
   time: { color: 'gray' },
 });
