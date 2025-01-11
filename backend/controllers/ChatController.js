@@ -2,21 +2,20 @@ const pool = require('../server');
 
 // Alle Chats eines Benutzers abrufen
 const getChats = async (req, res) => {
-  const { userId } = req.params;
-
-  try {
-    const result = await pool.query(
-      'SELECT c.id, c.name, m.text AS lastMessage, m.created_at AS time FROM chats c ' +
-      'LEFT JOIN messages m ON c.id = m.chat_id ' +
-      'WHERE c.user_id = $1 ORDER BY m.created_at DESC',
-      [userId]
-    );
-    res.status(200).json(result.rows);
-  } catch (err) {
-    console.error('Server Error:', err.message);
-    res.status(500).send('Server Error');
-  }
-};
+    try {
+      const userId = req.user.id; 
+      const result = await pool.query(
+        'SELECT c.id, c.name, m.text AS lastMessage, m.created_at AS time FROM chats c ' +
+        'LEFT JOIN messages m ON c.id = m.chat_id ' +
+        'WHERE c.user_id = $1 ORDER BY m.created_at DESC',
+        [userId]
+      );
+      res.status(200).json(result.rows);
+    } catch (err) {
+      console.error('Server Error:', err.message);
+      res.status(500).send('Server Error');
+    }
+  };
 
 // Nachrichten eines Chats abrufen
 const getMessages = async (req, res) => {

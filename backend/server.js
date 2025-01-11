@@ -33,8 +33,11 @@ app.get('/', async (req, res) => {
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);
 
-const chatRoutes = require('./routes/ChatRoutes');
+const chatRoutes = require('./routes/chatRoutes');
 app.use('/api/chats', chatRoutes);
+
+const userRoutes = require('./routes/userRoutes');
+app.use('/api/user', userRoutes);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server läuft auf Port ${PORT}`));
