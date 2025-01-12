@@ -1,9 +1,9 @@
 {
   "expo": {
-    "entryPoint": "./App.tsx",
-    "name": "FrontendApp",
-    "slug": "FrontendApp",
+    "name": "NextMe App",
+    "slug": "nextme-app",
     "version": "1.0.0",
+    "sdkVersion": "52.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "myapp",
@@ -32,7 +32,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-router"
     ],
     "experiments": {
       "typedRoutes": true
