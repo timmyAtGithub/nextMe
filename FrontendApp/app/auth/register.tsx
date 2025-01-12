@@ -3,6 +3,8 @@ import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import styles from '../styles/RegisterScreenStyles';
+import apiConfig from '../configs/apiConfig';
+
 
 const RegisterScreen: React.FC = () => {
   const router = useRouter();
@@ -21,7 +23,7 @@ const RegisterScreen: React.FC = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/register', {
+      const response = await axios.post(`${apiConfig.BASE_URL}/api/auth/register`, {
         firstName,
         lastName,
         username,

@@ -1,3 +1,4 @@
+const apiConfig = require('../configs/apiConfig');
 const pool = require('../server');
 const multer = require('multer');
 
@@ -12,7 +13,8 @@ const uploadProfileImage = async (req, res) => {
       console.log('Uploaded File:', req.file);
   
       const userId = req.user.id;
-      const imagePath = `http://localhost:5000/uploads/profileImage/${req.file.filename}`;
+      const imagePath = `${apiConfig.BASE_URL}/uploads/profileImage/${req.file.filename}`;
+      console.log("Image Path:", imagePath);
       await pool.query('UPDATE users SET profile_image = $1 WHERE id = $2', [imagePath, userId]);
   
       res.json({ profileImage: imagePath });

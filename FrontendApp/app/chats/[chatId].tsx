@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import GlobalStyles from '../styles/globalStyles';
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import apiConfig from '../configs/apiConfig';
 
 const Chat = () => {
   const router = useRouter();
@@ -76,7 +77,7 @@ const Chat = () => {
       
   
       console.log("Sending request to server...");
-      const res = await fetch("http://localhost:5000/api/chats/send-media", {
+      const res = await fetch(`${apiConfig.BASE_URL}/api/chats/send-media`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -108,7 +109,7 @@ const Chat = () => {
     const fetchUserId = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/auth/me', {
+        const response = await fetch(`${apiConfig.BASE_URL}/api/auth/me`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -128,7 +129,7 @@ const Chat = () => {
     const fetchChatDetails = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/chats/details/${chatId}`, {
+        const response = await fetch(`${apiConfig.BASE_URL}/api/chats/details/${chatId}`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -153,7 +154,7 @@ const Chat = () => {
     const fetchMessages = async () => {
         try {
             const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`http://localhost:5000/api/chats/messages/${chatId}`, {
+            const response = await fetch(`${apiConfig.BASE_URL}/api/chats/messages/${chatId}`, {
                 method: 'GET',
                 headers: { Authorization: `Bearer ${token}` },
             });
@@ -188,7 +189,7 @@ const Chat = () => {
 
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/chats/messages', {
+      const response = await fetch(`${apiConfig.BASE_URL}/chats/messages`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -228,8 +229,6 @@ const Chat = () => {
   data={messages}
   keyExtractor={(item) => item.id.toString()}
   renderItem={({ item }) => {
-    console.log('Rendering Item:', item);
-    console.log('Rendering Item Type:', item.type);
     if (item.type === "media") {
       console.log('Media content:', item.content);
       return (

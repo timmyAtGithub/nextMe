@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import BottomNavigation from '../Components/BottomNavigation';
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiConfig from '../configs/apiConfig';
 
 const ChatsOverview: React.FC = () => {
   const [chats, setChats] = useState([]);
@@ -13,7 +14,7 @@ const ChatsOverview: React.FC = () => {
     const fetchChats = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/chats/me', {
+        const response = await fetch(`${apiConfig.BASE_URL}/api/chats/me`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });

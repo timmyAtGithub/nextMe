@@ -5,6 +5,8 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; 
 import styles from '../styles/profileStyles';
+import apiConfig from '../configs/apiConfig';
+
 
 const Profile: React.FC = () => {
   const router = useRouter(); 
@@ -21,7 +23,7 @@ const Profile: React.FC = () => {
   const fetchUserData = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/user/me', {
+      const response = await fetch(`${apiConfig.BASE_URL}/api/user/me`, {
         method: 'GET',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -52,7 +54,7 @@ const Profile: React.FC = () => {
       formData.append('profileImage', blob, 'profile.jpg');
   
       const token = await AsyncStorage.getItem('token');
-      const uploadResponse = await fetch('http://localhost:5000/api/user/upload-profile-image', {
+      const uploadResponse = await fetch(`${apiConfig.BASE_URL}/api/user/upload-profile-image`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`, 
@@ -94,7 +96,7 @@ const Profile: React.FC = () => {
   const handleSave = async (field: 'username' | 'about', value: string) => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/user/edit-profile', {
+      const response = await fetch(`${apiConfig.BASE_URL}/api/user/edit-profile`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
