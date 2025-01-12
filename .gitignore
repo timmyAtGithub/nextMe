@@ -45,3 +45,5 @@ app-example
 
 # Build directories
 build/
+
+uploads/

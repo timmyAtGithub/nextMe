@@ -29,6 +29,8 @@ const registerUser = async (req, res) => {
   }
 };
 
+const jwt = require('jsonwebtoken');
+
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
@@ -46,11 +48,33 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid username or password' });
     }
 
-    res.status(200).json({ message: 'Login successful', user: user });
+    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(200).json({ message: 'Login successful', token });
   } catch (err) {
     console.error('Server Error:', err.message);
     res.status(500).send('Server Error');
   }
 };
 
-module.exports = { registerUser, loginUser };
+const getCurrentUser = async (req, res) => {
+  try {
+    const userId = req.user.id; 
+    const result = await pool.query(
+      `SELECT id, username, profile_image FROM users WHERE id = $1`,
+      [userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json(result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching current user:', err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
+module.exports = { loginUser, registerUser, getCurrentUser }; 
+
