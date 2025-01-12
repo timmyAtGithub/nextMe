@@ -2,7 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
-import styles from './styles/LoginScreenStyles';
+import styles from '../styles/LoginScreenStyles';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 
 const LoginScreen: React.FC = () => {
   const router = useRouter();
@@ -24,6 +26,10 @@ const LoginScreen: React.FC = () => {
       });
 
       if (response.status === 200) {
+        const { token } = response.data;
+        
+        await AsyncStorage.setItem('token', token);
+
         console.log('Login successful:', response.data);
         router.push('/chats');
       }
@@ -34,7 +40,7 @@ const LoginScreen: React.FC = () => {
   };
 
   const handleRegister = () => {
-    router.push('/register');
+    router.push('./register');
   };
 
   return (

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
-import styles from './styles/RegisterScreenStyles';
+import styles from '../styles/RegisterScreenStyles';
 
 const RegisterScreen: React.FC = () => {
   const router = useRouter();
@@ -31,7 +31,7 @@ const RegisterScreen: React.FC = () => {
 
       if (response.status === 201) {
         console.log('User registered:', response.data.user);
-        router.push('/login');
+        router.push('./login');
       }
     } catch (err) {
       setError('Error registering user');
@@ -86,7 +86,7 @@ const RegisterScreen: React.FC = () => {
 
       <Button title="Register" onPress={handleRegister} />
 
-      <TouchableOpacity onPress={() => router.push('/login')}>
+      <TouchableOpacity onPress={() => router.push('./login')}>
         <Text style={styles.loginText}>
           Already have an account? <Text style={styles.loginLink}>Login</Text>
         </Text>
