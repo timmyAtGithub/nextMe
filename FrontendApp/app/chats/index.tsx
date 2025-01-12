@@ -54,10 +54,7 @@ const ChatsOverview: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      {/* Header */}
       <Header />
-
-      {/* Chats List */}
       <FlatList
         data={chats}
         keyExtractor={(item) => item.id.toString()}
@@ -65,8 +62,6 @@ const ChatsOverview: React.FC = () => {
         contentContainerStyle={styles.chatList}
         ListEmptyComponent={<Text style={styles.emptyText}>No chats available</Text>}
       />
-
-      {/* Bottom Navigation */}
       <BottomNavigation />
     </View>
   );

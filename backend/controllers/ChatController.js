@@ -36,30 +36,41 @@ const getChats = async (req, res) => {
 
   const getMessages = async (req, res) => {
     const { chatId } = req.params;
-  
+    const userId = req.user.id;
+
     try {
-      const result = await pool.query(
-        `SELECT 
-           m.id, 
-           m.text, 
-           m.sender_id, 
-           m.created_at 
-         FROM messages m
-         WHERE m.chat_id = $1
-         ORDER BY m.created_at ASC`,
-        [chatId]
-      );
-  
-      if (result.rows.length === 0) {
-        return res.status(404).json({ message: 'No messages found for this chat' });
-      }
-  
-      res.status(200).json(result.rows);
+        const chatCheck = await pool.query(
+            `SELECT * FROM chats WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)`,
+            [chatId, userId]
+        );
+
+        if (chatCheck.rows.length === 0) {
+            return res.status(403).json({ message: 'Access denied: You are not a member of this chat' });
+        }
+
+        const result = await pool.query(
+            `SELECT 
+                m.id, 
+                m.text, 
+                m.sender_id, 
+                m.created_at 
+             FROM messages m
+             WHERE m.chat_id = $1
+             ORDER BY m.created_at ASC`,
+            [chatId]
+        );
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ message: 'No messages found for this chat' });
+        }
+
+        res.status(200).json(result.rows);
     } catch (err) {
-      console.error('Error fetching messages:', err.message);
-      res.status(500).send('Server Error');
+        console.error('Error fetching messages:', err.message);
+        res.status(500).send('Server Error');
     }
-  };
+};
+
   
 const sendMessage = async (req, res) => {
     const { chatId, text } = req.body;
