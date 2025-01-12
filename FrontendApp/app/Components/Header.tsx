@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Ionicons } from '@expo/vector-icons'; 
+import { Ionicons } from '@expo/vector-icons';
+
 
 const Header: React.FC = () => {
   const [userData, setUserData] = useState<{ username: string; profileImage: string } | null>(null);

@@ -1,18 +1,34 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import GlobalStyles from '../styles/globalStyles';
+import * as ImagePicker from "expo-image-picker";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 
 const Chat = () => {
   const router = useRouter();
   const { chatId } = useLocalSearchParams();
+  const flatListRef = useRef<FlatList>(null);
+
 
   interface Message {
     id: number;
     text: string;
     sender_id: number;
     created_at: string;
+    content?: string;
+    type?: string;
   }
+
+  const openImageModal = (imageUri: string) => {
+    setSelectedImage(imageUri);
+    setModalVisible(true);
+  };
+  const closeImageModal = () => {
+    setModalVisible(false);
+    setSelectedImage(null);
+  };
 
   interface ChatDetails {
     friend_username: string;
@@ -22,6 +38,71 @@ const Chat = () => {
   const [chatDetails, setChatDetails] = useState<ChatDetails | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null); 
+  const [isModalVisible, setModalVisible] = useState(false);
+  
+
+  const pickImage = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      quality: 1,
+    });
+  
+    if (!result.canceled) {
+      sendMedia(result.assets[0].uri, Array.isArray(chatId) ? chatId[0] : chatId);
+    }
+  };
+
+  const sendMedia = async (uri: string, chatId: string) => {
+    try {
+      console.log("--- Sending Media ---");
+      console.log("Media URI:", uri);
+      console.log("Chat ID:", chatId);
+  
+      const formData = new FormData();
+  
+      console.log("Fetching media blob...");
+      const response = await fetch(uri);
+      const blob = await response.blob();
+      console.log("Blob fetched:", blob);
+  
+      formData.append("media", blob, "media.jpg");
+      formData.append("chatId", String(chatId));
+      console.log("FormData prepared:", Array.from(formData.entries()));
+
+      const token = await AsyncStorage.getItem('token');
+      console.log("Token being used:", token);
+      
+  
+      console.log("Sending request to server...");
+      const res = await fetch("http://localhost:5000/api/chats/send-media", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+  
+      console.log("Server responded with status:", res.status);
+      const data = await res.json();
+      console.log("Response data:", data);
+  
+      if (res.ok) {
+        console.log("Media sent successfully:", data);
+      } else {
+        console.error("Error sending media:", data.message);
+      }
+    } catch (error) {
+      console.error("Error uploading media:", error);
+    }
+  };
+
+  const scrollToBottom = (animated = true) => {
+      flatListRef.current?.scrollToEnd({ animated });
+  };
+
+  
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -31,6 +112,7 @@ const Chat = () => {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
+        
 
         if (response.ok) {
           const data = await response.json();
@@ -50,6 +132,7 @@ const Chat = () => {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
+       
 
         if (response.ok) {
           const data = await response.json();
@@ -94,7 +177,7 @@ const Chat = () => {
     fetchMessages();
     const interval = setInterval(() => {
         fetchMessages();
-    }, 5000); 
+    }, 500); 
 
     return () => clearInterval(interval);
 }, [chatId]);
@@ -118,6 +201,7 @@ const Chat = () => {
         const message = await response.json();
         setMessages((prevMessages) => [...prevMessages, message]);
         setNewMessage('');
+        scrollToBottom();
       } else {
         console.error('Failed to send message');
       }
@@ -125,129 +209,154 @@ const Chat = () => {
       console.error('Error sending message:', error);
     }
   };
-
   return (
-    <View style={styles.container}>
-      {chatDetails && (
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.push('/chats')}>
-            <Text style={styles.backButton}>{'<'} Back</Text>
-          </TouchableOpacity>
-          <Text style={styles.chatTitle}>{chatDetails.friend_username}</Text>
-        </View>
-      )}
+    <View style={[styles.container, GlobalStyles.background]}>
+    {chatDetails && (
+      <View style={[GlobalStyles.header]}>
+        <TouchableOpacity onPress={() => router.push('/chats')}>
+         <Ionicons name="arrow-back" size={24} color="#FFF" />
+        </TouchableOpacity>
+        <Image
+          source={{ uri: chatDetails.friend_profile_image }}
+          style={GlobalStyles.profileImage}
+        />
+        <Text style={GlobalStyles.title}>{chatDetails.friend_username}</Text>
+      </View>
+    )}
 <FlatList
+  ref={flatListRef}
   data={messages}
   keyExtractor={(item) => item.id.toString()}
-  renderItem={({ item }) => (
-    <View
-      style={[
-        styles.messageItem,
-        item.sender_id === userId ? styles.myMessage : styles.theirMessage,
-      ]}
-    >
-      <Text style={styles.text}>{item.text}</Text>
-      <Text style={styles.timestamp}>
-        {new Date(item.created_at).toLocaleTimeString([], {
-          hour: '2-digit',
-          minute: '2-digit',
-        })}
-      </Text>
-    </View>
-  )}
+  renderItem={({ item }) => {
+    console.log('Rendering Item:', item);
+    console.log('Rendering Item Type:', item.type);
+    if (item.type === "media") {
+      console.log('Media content:', item.content);
+      return (
+        <View
+          style={
+            item.sender_id === userId
+              ? GlobalStyles.rightBubble
+              : GlobalStyles.leftBubble
+          }
+        >
+          <TouchableOpacity onPress={() => openImageModal(item.content)}>
+            <Image
+              source={{ uri: item.content }}
+              style={GlobalStyles.media}
+              resizeMode="cover"
+              onError={(e) =>
+                console.error('Image load error:', e.nativeEvent.error)
+              }
+            />
+          </TouchableOpacity>
+        </View>
+      );
+    }
+    return (
+      <View
+        style={
+          item.sender_id === userId
+            ? GlobalStyles.rightBubble
+            : GlobalStyles.leftBubble
+        }
+      >
+        <Text
+          style={
+            item.sender_id === userId
+              ? GlobalStyles.Bubbletext
+              : GlobalStyles.Bubbletext
+          }
+        >
+          {item.text}
+        </Text>
+      </View>
+    );
+  }}
   contentContainerStyle={styles.messageList}
+  onContentSizeChange={() => scrollToBottom(false)}
 />
 
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          value={newMessage}
-          onChangeText={setNewMessage}
-        />
-        <TouchableOpacity style={styles.sendButton} onPress={sendMessage}>
-          <Text style={styles.sendButtonText}>Send</Text>
-        </TouchableOpacity>
+    <View style={[GlobalStyles.inputContainer]}>
+      <TextInput
+        style={GlobalStyles.input}
+        placeholder="Type a message..."
+        value={newMessage}
+        onChangeText={setNewMessage}
+        placeholderTextColor="#888"
+      />
+      <TouchableOpacity
+        style={[GlobalStyles.button]}
+        onPress={sendMessage}
+      >
+        <Text style={GlobalStyles.buttonText}>Send</Text>
+      </TouchableOpacity>
+      <View style={GlobalStyles.mediaOptions}>
+  <TouchableOpacity onPress={pickImage}>
+    <MaterialIcons name="photo" size={24} color="#FFFF" />
+  </TouchableOpacity>
       </View>
+      <Modal
+  visible={isModalVisible}
+  transparent={true}
+  animationType="fade"
+  onRequestClose={closeImageModal}
+>
+  <TouchableWithoutFeedback onPress={closeImageModal}>
+    <View style={styles.modalBackground}>
+      {selectedImage ? (
+        <Image
+          source={{ uri: selectedImage }}
+          style={styles.fullImage}
+          resizeMode="contain"
+        />
+      ) : null}
     </View>
+  </TouchableWithoutFeedback>
+</Modal>
+    </View>
+  </View>
+     
+
   );
 };
+  
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#1E1E1E',
-  },
-  backButton: {
-    color: '#FFD700',
-    fontWeight: 'bold',
-    fontSize: 16,
-    marginRight: 10,
-  },
-  chatTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-  },
-  messageList: {
-    flex: 1,
-    padding: 10,
-  },
-  messageItem: {
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-    maxWidth: '70%',
-  },
-  myMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#FFD700',
-  },
-  theirMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#1E1E1E',
-  },
-  text: {
-    color: '#000000',
-  },
-  timestamp: {
-    fontSize: 10,
-    color: '#555555',
-    marginTop: 5,
-    textAlign: 'right',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderTopWidth: 1,
-    borderTopColor: '#333333',
-    padding: 10,
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    backgroundColor: '#1E1E1E',
-    color: '#FFFFFF',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginRight: 10,
-  },
-  sendButton: {
-    backgroundColor: '#FFD700',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 5,
-  },
-  sendButtonText: {
-    color: '#000000',
-    fontWeight: 'bold',
-  },
+    container: {
+      flex: 1,
+    },
+    backButton: {
+      fontSize: 18,
+      color: '#007AFF',
+    },
+    profileImage: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      marginLeft: 10,
+    },
+    messageList: {
+      flexGrow: 1,
+      padding: 10,
+      paddingBottom: 20,
+    },
+    messageItem: {
+      padding: 10,
+      borderRadius: 10,
+      marginBottom: 10,
+    },
+    modalBackground: {
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    fullImage: {
+      width: '90%',
+      height: '90%',
+    },
+    
 });
 
 export default Chat;

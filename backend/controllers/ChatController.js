@@ -49,14 +49,7 @@ const getChats = async (req, res) => {
         }
 
         const result = await pool.query(
-            `SELECT 
-                m.id, 
-                m.text, 
-                m.sender_id, 
-                m.created_at 
-             FROM messages m
-             WHERE m.chat_id = $1
-             ORDER BY m.created_at ASC`,
+            `SELECT id, chat_id, sender_id, type, content, text, created_at FROM messages WHERE chat_id = $1 ORDER BY created_at ASC`,
             [chatId]
         );
 
@@ -151,6 +144,40 @@ const getChatDetails = async (req, res) => {
       res.status(500).send('Server Error');
     }
   };
+
+  const sendMedia = async (req, res) => {
+    try {
+      console.log("--- Upload Media Request Received ---");
+      console.log("Headers:", req.headers);
+      console.log("Request Body:", req.body);
+  
+      if (!req.file) {
+        return res.status(400).json({ message: "No media uploaded" });
+      }
+  
+      const chatId = parseInt(req.body.chatId, 10);
+      if (isNaN(chatId)) {
+        return res.status(400).json({ message: "Invalid chat ID" });
+      }
+  
+      const senderId = req.user.id;
+      const mediaPath = `http://localhost:5000/uploads/media/${req.file.filename}`;
+      console.log("Chat ID:", chatId);
+      console.log("Sender ID:", senderId);
+      console.log("Media Path:", mediaPath);
+  
+      await pool.query(
+        'INSERT INTO messages (chat_id, sender_id, type, text, content) VALUES ($1, $2, $3, $4, $5)',
+        [chatId, senderId, 'media', '[Media]', mediaPath]
+      );
+  
+      res.json({ message: "Media sent successfully", mediaPath });
+    } catch (err) {
+      console.error("Error uploading media:", err);
+      res.status(500).json({ message: "Server Error" });
+    }
+  };
   
   
-module.exports = { getChats, getMessages, sendMessage, startChat, getChatDetails };
+
+module.exports = { getChats, getMessages, sendMessage, startChat, getChatDetails, sendMedia };
