@@ -3,6 +3,7 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from 'r
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import apiConfig from '../configs/apiConfig';
 
 const AddFriend: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -17,7 +18,7 @@ const AddFriend: React.FC = () => {
       try {
         const token = await AsyncStorage.getItem('token');
 
-        const userResponse = await fetch('http://localhost:5000/api/user/me', {
+        const userResponse = await fetch(`${apiConfig.BASE_URL}/api/user/me`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -27,7 +28,7 @@ const AddFriend: React.FC = () => {
           setCurrentUserId(userData.id);
         }
 
-        const friendsResponse = await fetch('http://localhost:5000/api/user/friends', {
+        const friendsResponse = await fetch(`${apiConfig.BASE_URL}/api/user/friends`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -48,7 +49,7 @@ const AddFriend: React.FC = () => {
     const fetchSentRequests = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/user/sent-requests', {
+        const response = await fetch(`${apiConfig.BASE_URL}/api/user/sent-requests`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -77,7 +78,7 @@ const AddFriend: React.FC = () => {
 
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`http://localhost:5000/api/user/search?query=${query}`, {
+      const response = await fetch(`${apiConfig.BASE_URL}/api/user/search?query=${query}`, {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -96,7 +97,7 @@ const AddFriend: React.FC = () => {
   const sendFriendRequest = async (friendId: string) => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/user/add-friend', {
+      const response = await fetch(`${apiConfig.BASE_URL}/api/user/add-friend`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

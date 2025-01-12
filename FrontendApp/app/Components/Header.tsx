@@ -3,6 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, ActivityIndicator } fr
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
+import apiConfig from '../configs/apiConfig';
 
 
 const Header: React.FC = () => {
@@ -14,7 +15,7 @@ const Header: React.FC = () => {
     const fetchUserData = async () => {
       try {
         const token = await AsyncStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/user/me', {
+        const response = await fetch(`${apiConfig.BASE_URL}/api/user/me`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,

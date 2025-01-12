@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import Header from '../Components/Header';
 import BottomNavigation from '../Components/BottomNavigation';
+import apiConfig from '../configs/apiConfig';
 
 const Friends: React.FC = () => {
   const [friends, setFriends] = useState<any[]>([]);
@@ -15,7 +16,7 @@ const Friends: React.FC = () => {
   const openOrCreateChat = async (friendId: string | number) => {
     try {
         const token = await AsyncStorage.getItem('token');
-        const response = await fetch('http://localhost:5000/api/chats/start', {
+        const response = await fetch(`${apiConfig.BASE_URL}/api/chats/start`, {
             method: 'POST',
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -39,7 +40,7 @@ const Friends: React.FC = () => {
       try {
         const token = await AsyncStorage.getItem('token');
 
-        const requestsResponse = await fetch('http://localhost:5000/api/user/friend-requests', {
+        const requestsResponse = await fetch(`${apiConfig.BASE_URL}/api/user/friend-requests`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -49,7 +50,7 @@ const Friends: React.FC = () => {
           setFriendRequests(requestsData);
         }
 
-        const friendsResponse = await fetch('http://localhost:5000/api/user/friends', {
+        const friendsResponse = await fetch(`${apiConfig.BASE_URL}/api/user/friends`, {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
@@ -69,7 +70,7 @@ const Friends: React.FC = () => {
   const respondToRequest = async (requestId: string | number, action: string) => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/user/friend-requests/respond', {
+      const response = await fetch(`${apiConfig.BASE_URL}/api/user/friend-requests/respond`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

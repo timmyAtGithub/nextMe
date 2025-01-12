@@ -1,4 +1,6 @@
+const apiConfig = require('../configs/apiConfig');
 const pool = require('../server');
+
 
 const getChats = async (req, res) => {
     const userId = req.user.id;
@@ -161,7 +163,7 @@ const getChatDetails = async (req, res) => {
       }
   
       const senderId = req.user.id;
-      const mediaPath = `http://localhost:5000/uploads/media/${req.file.filename}`;
+      const mediaPath = `${apiConfig.BASE_URL}/uploads/media/${req.file.filename}`;
       console.log("Chat ID:", chatId);
       console.log("Sender ID:", senderId);
       console.log("Media Path:", mediaPath);

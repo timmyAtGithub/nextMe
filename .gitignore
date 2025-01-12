@@ -46,4 +46,8 @@ app-example
 # Build directories
 build/
 
+# Pictures
 uploads/
+
+# BaseUrlConfig
+apiConfig.js

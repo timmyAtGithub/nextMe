@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import styles from '../styles/LoginScreenStyles';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import apiConfig from '../configs/apiConfig';
 
 
 const LoginScreen: React.FC = () => {
@@ -20,7 +21,7 @@ const LoginScreen: React.FC = () => {
     }
 
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      const response = await axios.post(`${apiConfig.BASE_URL}/api/auth/login`, {
         username,
         password,
       });
