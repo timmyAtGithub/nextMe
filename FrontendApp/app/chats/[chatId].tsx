@@ -68,34 +68,37 @@ const Chat = () => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        const response = await fetch(`http://localhost:5000/api/chats/messages/${chatId}`, {
-          method: 'GET',
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await fetch(`http://localhost:5000/api/chats/messages/${chatId}`, {
+                method: 'GET',
+                headers: { Authorization: `Bearer ${token}` },
+            });
 
-        if (response.ok) {
-          const data = await response.json();
-          setMessages(data);
-        } else {
-          console.error('Failed to fetch messages');
+            if (response.status === 403) {
+                console.error('Access denied to this chat');
+                router.push('/chats');
+                return;
+            }
+
+            if (response.ok) {
+                const data = await response.json();
+                setMessages(data);
+            } else {
+                console.error('Failed to fetch messages');
+            }
+        } catch (error) {
+            console.error('Error fetching messages:', error);
         }
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-      }
     };
-
     fetchMessages();
-
-    // Automatische Aktualisierung
     const interval = setInterval(() => {
-      fetchMessages();
-    }, 5000); // Alle 5 Sekunden
+        fetchMessages();
+    }, 5000); 
 
-    // Cleanup beim Verlassen des Screens
     return () => clearInterval(interval);
-  }, [chatId]);
+}, [chatId]);
+
 
   const sendMessage = async () => {
     if (!newMessage.trim()) return;
