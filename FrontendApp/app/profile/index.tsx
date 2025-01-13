@@ -6,6 +6,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; 
 import styles from '../styles/profileStyles';
 import apiConfig from '../configs/apiConfig';
+import * as FileSystem from 'expo-file-system';
+import * as ImageManipulator from 'expo-image-manipulator';
+
 
 
 const Profile: React.FC = () => {
@@ -29,17 +32,19 @@ const Profile: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
+  
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
       }
-
+  
       const data = await response.json();
+      console.log('User Data:', data);
       setUserData(data);
     } catch (error) {
       console.error('Error fetching user data:', error);
     }
   };
+  
 
   useEffect(() => {
     fetchUserData();
@@ -47,46 +52,102 @@ const Profile: React.FC = () => {
 
   const uploadImage = async (uri: string) => {
     try {
+      console.log("Starting uploadImage with URI:", uri);
+  
       const formData = new FormData();
       const response = await fetch(uri);
       const blob = await response.blob();
+      formData.append("profileImage", blob, "profile.jpg");  
+      console.log("FormData prepared:", Array.from(formData.entries()));
   
-      formData.append('profileImage', blob, 'profile.jpg');
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        Alert.alert("Error", "Authentication token not found");
+        return;
+      }
   
-      const token = await AsyncStorage.getItem('token');
-      const uploadResponse = await fetch(`${apiConfig.BASE_URL}/api/user/upload-profile-image`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`, 
-        },
-        body: formData,
-      });
+      const uploadResponse = await fetch(
+        `${apiConfig.BASE_URL}/api/user/upload-profile-image`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
   
       const data = await uploadResponse.json();
+      console.log("Response from server:", data);
   
       if (uploadResponse.ok) {
-        Alert.alert('Success', 'Profile image updated successfully');
-        fetchUserData(); 
+        Alert.alert("Success", "Image uploaded successfully");
       } else {
-        Alert.alert('Error', data.message || 'Failed to upload image');
+        Alert.alert("Error", data.message || "Failed to upload the image");
       }
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error("Error occurred during image upload:", error);
+      Alert.alert("Error", "An unexpected error occurred during upload");
     }
   };
   
   
+  const prepareFileForUpload = async (uri: string) => {
+    try {
+      const fileUri = `${FileSystem.documentDirectory}temp.jpg`;
+      await FileSystem.copyAsync({
+        from: uri,
+        to: fileUri,
+      });
+      return fileUri;
+    } catch (error) {
+      console.error('Error preparing file for upload:', error);
+      throw error;
+    }
+  };
   
-
+  const resizeImage = async (uri: string) => {
+    try {
+      const resizedImage = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 800 } }],
+        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+      );
+      return resizedImage.uri;
+    } catch (error) {
+      console.error('Error resizing image:', error);
+      throw error;
+    }
+  };
+  
+  const handleResizeAndUpload = async (uri: string) => {
+    try {
+      const resizedUri = await resizeImage(uri);
+      await uploadImage(resizedUri);
+    } catch (error) {
+      console.error('Error during resizing and upload:', error);
+    }
+  };
+  
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
   
-    if (!result.canceled) {
-      await uploadImage(result.assets[0].uri);
+      if (!result.canceled) {
+        console.log('Selected image:', result.assets[0].uri);
+        await handleResizeAndUpload(result.assets[0].uri);
+      }
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error('Error picking image:', error.message);
+      } else {
+        console.error('Error picking image:', error);
+      }
+      Alert.alert('Error', 'An error occurred while picking the image');
     }
   };
   
@@ -130,10 +191,13 @@ const Profile: React.FC = () => {
         onPress={() => router.push('/chats')}
       >
         <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+       
       </TouchableOpacity>
 
       <TouchableOpacity onPress={pickImage}>
-        <Image source={{ uri: userData.profileImage }} style={styles.profileImage} />
+        
+      <Image source={{ uri: `${userData.profile_image}` }}style={styles.profileImage}/>
+
       </TouchableOpacity>
       <Button title="Edit Image" onPress={pickImage} />
 

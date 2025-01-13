@@ -149,7 +149,7 @@ const AddFriend: React.FC = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.backButton} onPress={() => router.push('../friends')}>
-       
+        <Ionicons name="arrow-back" size={24} color="#FFF" />
       </TouchableOpacity>
 
       <TextInput

@@ -20,6 +20,7 @@ const Chat = () => {
     created_at: string;
     content?: string;
     type?: string;
+    friend_id: number;
   }
 
   const openImageModal = (imageUri: string) => {
@@ -33,6 +34,7 @@ const Chat = () => {
 
   interface ChatDetails {
     friend_username: string;
+    friend_id: number;
   }
 
   const [messages, setMessages] = useState<Message[]>([]);
@@ -65,16 +67,26 @@ const Chat = () => {
   
       console.log("Fetching media blob...");
       const response = await fetch(uri);
+      if (!response.ok) {
+        throw new Error("Failed to fetch image from URI");
+      }
       const blob = await response.blob();
       console.log("Blob fetched:", blob);
   
-      formData.append("media", blob, "media.jpg");
+      formData.append("media", {
+        uri,
+        type: "image/jpeg",
+        name: "media.jpg",
+      } as any);
+  
       formData.append("chatId", String(chatId));
       console.log("FormData prepared:", Array.from(formData.entries()));
-
-      const token = await AsyncStorage.getItem('token');
+  
+      const token = await AsyncStorage.getItem("token");
+      if (!token) {
+        throw new Error("Authentication token not found");
+      }
       console.log("Token being used:", token);
-      
   
       console.log("Sending request to server...");
       const res = await fetch(`${apiConfig.BASE_URL}/api/chats/send-media`, {
@@ -92,18 +104,17 @@ const Chat = () => {
       if (res.ok) {
         console.log("Media sent successfully:", data);
       } else {
-        console.error("Error sending media:", data.message);
+        console.error("Error sending media:", data.message || "Unknown error");
       }
     } catch (error) {
       console.error("Error uploading media:", error);
     }
   };
+  
 
   const scrollToBottom = (animated = true) => {
       flatListRef.current?.scrollToEnd({ animated });
   };
-
-  
 
   useEffect(() => {
     const fetchUserId = async () => {
@@ -184,32 +195,48 @@ const Chat = () => {
 }, [chatId]);
 
 
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
+const sendMessage = async () => {
+  if (!newMessage.trim()) {
+    console.error('Message is empty. Cannot send.');
+    return;
+  }
 
-    try {
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${apiConfig.BASE_URL}/chats/messages`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ chatId, text: newMessage }),
-      });
-
-      if (response.ok) {
-        const message = await response.json();
-        setMessages((prevMessages) => [...prevMessages, message]);
-        setNewMessage('');
-        scrollToBottom();
-      } else {
-        console.error('Failed to send message');
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
+  try {
+    const token = await AsyncStorage.getItem('token');
+    if (!token) {
+      console.error('Token not found');
+      return;
     }
-  };
+
+    console.log('Sending message with chatId:', chatId);
+    console.log('Message text:', newMessage);
+
+    const response = await fetch(`${apiConfig.BASE_URL}/api/chats/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ chatId, text: newMessage }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      console.log('Message sent successfully:', data);
+      setMessages((prevMessages) => [...prevMessages, data]);
+      setNewMessage('');
+      scrollToBottom();
+    } else {
+      console.error('Failed to send message:', data.message || data);
+    }
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
+};
+
+  console.log('Chat Details: ', chatDetails);
+
   return (
     <View style={[styles.container, GlobalStyles.background]}>
     {chatDetails && (
@@ -221,7 +248,10 @@ const Chat = () => {
           source={{ uri: chatDetails.friend_profile_image }}
           style={GlobalStyles.profileImage}
         />
-        <Text style={GlobalStyles.title}>{chatDetails.friend_username}</Text>
+        <TouchableOpacity onPress={() => router.push({ pathname: `../profile/${chatDetails.friend_id}` })}>
+          <Text style={GlobalStyles.title}>{chatDetails.friend_username}</Text>
+        </TouchableOpacity>
+
       </View>
     )}
 <FlatList

@@ -51,3 +51,6 @@ uploads/
 
 # BaseUrlConfig
 apiConfig.js
+
+#sql
+*.sql
