@@ -80,13 +80,17 @@ const getUserDetails = async (req, res) => {
 
 const getContactDetails = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const result = await pool.query('SELECT username, profile_image, about FROM users WHERE id = $1', [userId]);
-
+    const contactId = req.params.id;
+    console.log('Fetching contact details for ID:', contactId);
+    const result = await pool.query(
+      'SELECT username, profile_image, about FROM users WHERE id = $1',
+      [contactId]
+    );
     if (result.rows.length === 0) {
-      return res.status(404).json({ message: 'User not found' });
+      console.log('Contact not found for ID:', contactId);
+      return res.status(404).json({ message: 'Contact not found' });
     }
-
+    console.log('Contact details:', result.rows[0]);
     res.status(200).json(result.rows[0]);
   } catch (err) {
     console.error('Server Error:', err.message);
@@ -226,10 +230,125 @@ const getFriends = async (req, res) => {
       res.status(500).send('Server Error');
     }
   };
-  
-  
 
-  module.exports = {getContactDetails, uploadProfileImage, updateProfile, getUserDetails, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests};
+  const removeFriend = async (req, res) => {
+    const userId = req.user.id;
+    const { contactId } = req.params; 
+  
+    console.log('Received request to remove friend:', { userId, contactId });
+  
+    if (!userId || !contactId) {
+      return res.status(400).json({ message: 'Both userId and contactId are required' });
+    }
+    try {
+      const result = await pool.query(
+        `DELETE FROM friends 
+         WHERE (user_id = $1 AND friend_id = $2) 
+            OR (user_id = $2 AND friend_id = $1)`,
+        [userId, contactId]
+      );
+      console.log('Deletion result:', result);
+      if (result.rowCount > 0) {
+        res.status(200).json({ message: 'Friend relationship removed successfully.' });
+      } else {
+        res.status(404).json({ message: 'No friend relationship found to delete.' });
+      }
+    } catch (err) {
+      console.error('Error removing friend:', err.message);
+      res.status(500).json({ message: 'Server error' });
+    }
+  };
+
+  const isFriend = async (req, res) => {
+    const userId = req.user.id; // Aktueller Benutzer
+    const { chatId } = req.params; // Chat-ID aus der Anfrage
+  
+    console.log('Received request to check friendship status:', { userId, chatId });
+  
+    if (!userId || !chatId) {
+      return res.status(400).json({ message: 'Both userId and chatId are required' });
+    }
+  
+    try {
+      // Ermittele friend_id basierend auf chatId und userId
+      const chatResult = await pool.query(
+        `SELECT 
+           CASE 
+             WHEN user1_id = $2 THEN user2_id
+             WHEN user2_id = $2 THEN user1_id
+             ELSE NULL
+           END AS friend_id
+         FROM chats
+         WHERE id = $1`,
+        [chatId, userId]
+      );
+  
+      if (chatResult.rows.length === 0 || !chatResult.rows[0].friend_id) {
+        return res.status(404).json({ message: 'Chat not found or user not part of chat' });
+      }
+  
+      const friendId = chatResult.rows[0].friend_id;
+      console.log('Resolved friendId:', friendId);
+  
+      const friendshipResult = await pool.query(
+        `SELECT * 
+         FROM friends 
+         WHERE (user_id = $1 AND friend_id = $2) 
+            OR (user_id = $2 AND friend_id = $1)`,
+        [userId, friendId]
+      );
+  
+      console.log('Friendship query result:', friendshipResult.rows);
+  
+      if (friendshipResult.rows.length > 0) {
+        return res.status(200).json({ isFriend: true });
+      } else {
+        return res.status(200).json({ isFriend: false });
+      }
+    } catch (err) {
+      console.error('Error checking friendship status:', err.message);
+      return res.status(500).json({ message: 'Server error' });
+    }
+  };
+  const getFriendIdFromChat = async (req, res) => {
+    const userId = req.user.id;
+    const { chatId } = req.params; 
+  
+    console.log('Received request to get friendId from chatId:', { userId, chatId });
+  
+    if (!userId || !chatId) {
+      return res.status(400).json({ message: 'Both userId and chatId are required' });
+    }
+  
+    try {
+      const result = await pool.query(
+        `SELECT 
+           CASE 
+             WHEN user1_id = $2 THEN user2_id
+             WHEN user2_id = $2 THEN user1_id
+             ELSE NULL
+           END AS friend_id
+         FROM chats
+         WHERE id = $1`,
+        [chatId, userId]
+      );
+  
+      if (result.rows.length === 0 || !result.rows[0].friend_id) {
+        return res.status(404).json({ message: 'Chat not found or user not part of chat' });
+      }
+  
+      const friendId = result.rows[0].friend_id;
+  
+      console.log('FriendId resolved from chatId:', friendId);
+  
+      return res.status(200).json({ friendId });
+    } catch (err) {
+      console.error('Error fetching friendId from chatId:', err.message);
+      return res.status(500).json({ message: 'Internal server error' });
+    }
+  };
+  
+  module.exports = {getFriendIdFromChat ,isFriend ,removeFriend ,getContactDetails, uploadProfileImage, updateProfile, getUserDetails, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests};
 
 
   

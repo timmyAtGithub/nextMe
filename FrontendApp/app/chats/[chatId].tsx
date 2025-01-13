@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GlobalStyles from '../styles/globalStyles';
@@ -163,28 +163,23 @@ const Chat = () => {
 
   useEffect(() => {
     const fetchMessages = async () => {
-        try {
-            const token = await AsyncStorage.getItem('token');
-            const response = await fetch(`${apiConfig.BASE_URL}/api/chats/messages/${chatId}`, {
-                method: 'GET',
-                headers: { Authorization: `Bearer ${token}` },
-            });
-
-            if (response.status === 403) {
-                console.error('Access denied to this chat');
-                router.push('/chats');
-                return;
-            }
-
-            if (response.ok) {
-                const data = await response.json();
-                setMessages(data);
-            } else {
-                console.error('Failed to fetch messages');
-            }
-        } catch (error) {
-            console.error('Error fetching messages:', error);
+      try {
+        const token = await AsyncStorage.getItem('token');
+        const response = await fetch(`${apiConfig.BASE_URL}/api/chats/messages/${chatId}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (response.status === 403) {
+          Alert.alert('Error', 'You are not allowed to access this chat.');
+          router.push('/chats'); 
+          return;
         }
+        if (!response.ok) throw new Error('Failed to fetch messages');
+        const data = await response.json();
+        setMessages(data);
+      } catch (err) {
+        console.error('Error fetching messages:', err);
+        Alert.alert('Error', 'An error occurred while fetching messages.');
+      }
     };
     fetchMessages();
     const interval = setInterval(() => {

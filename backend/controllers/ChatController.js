@@ -37,56 +37,60 @@ const getChats = async (req, res) => {
   
 
   const getMessages = async (req, res) => {
+    const userId = req.user.id;
     const { chatId } = req.params;
-    const userId = req.user.id;
-
+  
     try {
-        const chatCheck = await pool.query(
-            `SELECT * FROM chats WHERE id = $1 AND (user1_id = $2 OR user2_id = $2)`,
-            [chatId, userId]
-        );
-
-        if (chatCheck.rows.length === 0) {
-            return res.status(403).json({ message: 'Access denied: You are not a member of this chat' });
-        }
-
-        const result = await pool.query(
-            `SELECT id, chat_id, sender_id, type, content, text, created_at FROM messages WHERE chat_id = $1 ORDER BY created_at ASC`,
-            [chatId]
-        );
-
-        if (result.rows.length === 0) {
-            return res.status(404).json({ message: 'No messages found for this chat' });
-        }
-
-        res.status(200).json(result.rows);
+      const friendCheck = await pool.query(
+        `SELECT * 
+         FROM friends f
+         JOIN chats c ON (c.user1_id = f.user_id AND c.user2_id = f.friend_id)
+                        OR (c.user1_id = f.friend_id AND c.user2_id = f.user_id)
+         WHERE c.id = $1 AND (f.user_id = $2 OR f.friend_id = $2)`,
+        [chatId, userId]
+      );
+  
+      if (friendCheck.rows.length === 0) {
+        return res.status(403).json({ message: 'You are not allowed to access this chat.' });
+      }
+      const messages = await pool.query('SELECT * FROM messages WHERE chat_id = $1', [chatId]);
+      res.status(200).json(messages.rows);
     } catch (err) {
-        console.error('Error fetching messages:', err.message);
-        res.status(500).send('Server Error');
+      console.error('Error fetching messages:', err.message);
+      res.status(500).json({ message: 'Server error' });
     }
-};
-
+  };
   
-const sendMessage = async (req, res) => {
-    const { chatId, text } = req.body;
+  const sendMessage = async (req, res) => {
     const userId = req.user.id;
-  
-    console.log('Received data:', { chatId, text, userId }); 
+    const { chatId, text } = req.body;
   
     try {
-      const result = await pool.query(
+      const friendCheck = await pool.query(
+        `SELECT * 
+         FROM friends f
+         JOIN chats c ON (c.user1_id = f.user_id AND c.user2_id = f.friend_id)
+                        OR (c.user1_id = f.friend_id AND c.user2_id = f.user_id)
+         WHERE c.id = $1 AND (f.user_id = $2 OR f.friend_id = $2)`,
+        [chatId, userId]
+      );
+  
+      if (friendCheck.rows.length === 0) {
+        return res.status(403).json({ message: 'You are not allowed to send messages in this chat.' });
+      }
+        const result = await pool.query(
         `INSERT INTO messages (chat_id, sender_id, text) 
          VALUES ($1, $2, $3) RETURNING *`,
         [chatId, userId, text]
       );
   
-      console.log('Message saved:', result.rows[0]); 
       res.status(201).json(result.rows[0]);
     } catch (err) {
       console.error('Error sending message:', err.message);
-      res.status(500).send('Server Error');
+      res.status(500).json({ message: 'Server error' });
     }
   };
+  
   
 
 const startChat = async (req, res) => {
