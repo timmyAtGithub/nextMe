@@ -1,5 +1,5 @@
 const express = require('express');
-const { uploadProfileImage ,getUserDetails, updateProfile, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests } = require('../controllers/userController');
+const { getContactDetails, uploadProfileImage ,getUserDetails, updateProfile, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests } = require('../controllers/userController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');;
 const router = express.Router();
@@ -13,5 +13,6 @@ router.get('/friend-requests', authenticateToken, getFriendRequests);
 router.post('/friend-requests/respond', authenticateToken, respondToFriendRequest);
 router.get('/search', authenticateToken, searchUsers);
 router.get('/sent-requests', authenticateToken, getSentFriendRequests);
+router.get('/getContactDetails/:id', authenticateToken, getContactDetails);
 
 module.exports = router;

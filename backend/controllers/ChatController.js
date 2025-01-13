@@ -115,37 +115,43 @@ const startChat = async (req, res) => {
     }
 };
 const getChatDetails = async (req, res) => {
-    const { chatId } = req.params;
-    const userId = req.user.id;
-  
-    try {
-      const result = await pool.query(
-        `SELECT 
-          CASE 
-            WHEN c.user1_id = $1 THEN u2.username 
-            ELSE u1.username 
-          END AS friend_username,
-          CASE 
-            WHEN c.user1_id = $1 THEN u2.profile_image 
-            ELSE u1.profile_image 
-          END AS friend_profile_image
-         FROM chats c
-         JOIN users u1 ON c.user1_id = u1.id
-         JOIN users u2 ON c.user2_id = u2.id
-         WHERE c.id = $2 AND (c.user1_id = $1 OR c.user2_id = $1)`,
-        [userId, chatId]
-      );
-  
-      if (result.rows.length === 0) {
-        return res.status(404).json({ message: 'Chat not found' });
-      }
-  
-      res.status(200).json(result.rows[0]);
-    } catch (err) {
-      console.error('Error fetching chat details:', err.message);
-      res.status(500).send('Server Error');
+  const { chatId } = req.params;
+  const userId = req.user.id;
+
+  try {
+    const result = await pool.query(
+      `SELECT 
+        CASE 
+          WHEN c.user1_id = $1 THEN u2.username 
+          ELSE u1.username 
+        END AS friend_username,
+        CASE 
+          WHEN c.user1_id = $1 THEN u2.profile_image 
+          ELSE u1.profile_image 
+        END AS friend_profile_image,
+        CASE
+          WHEN c.user1_id = $1 THEN u2.id
+          ELSE u1.id
+        END AS friend_id
+       FROM chats c
+       JOIN users u1 ON c.user1_id = u1.id
+       JOIN users u2 ON c.user2_id = u2.id
+       WHERE c.id = $2 AND (c.user1_id = $1 OR c.user2_id = $1)`,
+      [userId, chatId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ message: 'Chat not found' });
     }
-  };
+
+    res.status(200).json(result.rows[0]);
+    console.log("Chat Details:", result.rows[0]);
+  } catch (err) {
+    console.error('Error fetching chat details:', err.message);
+    res.status(500).send('Server Error');
+  }
+};
+
 
   const sendMedia = async (req, res) => {
     try {
