@@ -93,7 +93,7 @@ const Friends: React.FC = () => {
 
   const renderFriendRequest = ({ item }: { item: { id: string | number; profile_image: string; sender_name: string } }) => (
     <View style={styles.requestItem}>
-      <Image source={{ uri: item.profile_image }} style={styles.profileImage} />
+      <Image source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} style={styles.profileImage} />
       <Text style={styles.name}>{item.sender_name}</Text>
       <TouchableOpacity onPress={() => respondToRequest(item.id, 'accepted')}>
         <Text style={styles.accept}>✔</Text>
@@ -106,7 +106,7 @@ const Friends: React.FC = () => {
 
   const renderFriend = ({ item }: { item: { id: string | number; profile_image: string; name: string } }) => (
     <View style={styles.friendItem}>
-      <Image source={{ uri: item.profile_image }} style={styles.profileImage} />
+      <Image source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} style={styles.profileImage} />
       <Text style={styles.name}>{item.name}</Text>
       <TouchableOpacity onPress={() => openOrCreateChat(item.id)}>
         <Ionicons name="chatbubbles-outline" size={24} color="#FFF" />

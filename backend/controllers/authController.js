@@ -1,4 +1,4 @@
-const pool = require('../server');
+const pool = require('../db');
 const argon2 = require('argon2');
 
 const registerUser = async (req, res) => {

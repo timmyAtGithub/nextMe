@@ -196,7 +196,7 @@ const Profile: React.FC = () => {
 
       <TouchableOpacity onPress={pickImage}>
         
-      <Image source={{ uri: `${userData.profile_image}` }}style={styles.profileImage}/>
+      <Image source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }}style={styles.profileImage}/>
 
       </TouchableOpacity>
       <Button title="Edit Image" onPress={pickImage} />

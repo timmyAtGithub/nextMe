@@ -233,12 +233,12 @@ const ContactDetails = () => {
       >
         <Ionicons name="arrow-back" size={24} color="#FFF" />
       </TouchableOpacity>
-
-      <ProfileImage uri={contactData.profile_image} />
-
+  
+        <ProfileImage uri={`${apiConfig.BASE_URL}${contactData.profile_image}`} />
+  
       <Text style={styles.contactName}>{contactData.username || 'Unknown'}</Text>
       <Text style={styles.contactAbout}>{contactData.about || 'No details available'}</Text>
-
+  
       <TouchableOpacity
         style={[styles.removeButton, isLoading && styles.removeButtonDisabled]}
         onPress={() => setShowModal(true)}
@@ -253,14 +253,25 @@ const ContactDetails = () => {
           </>
         )}
       </TouchableOpacity>
+      <TouchableOpacity 
+  style={styles.createGroupButton}
+    onPress={() => router.push({
+    pathname: '/group/groupCreation',
+    params: { preselectedFriend: contactId }, 
+  })}
+>
+  <Ionicons name="people-outline" size={20} color="#FFF" />
+  <Text style={styles.buttonText}>Create Group</Text>
+</TouchableOpacity>
 
+  
       <ConfirmationModal
         visible={showModal}
         onCancel={() => setShowModal(false)}
         onConfirm={removeFriend}
       />
     </View>
-  );
+  );  
 };
 
 const styles = StyleSheet.create({
@@ -419,6 +430,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  createGroupButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 20,
+    minWidth: 180,
+  },
+  
 });
 
 export default ContactDetails;
