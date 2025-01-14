@@ -57,7 +57,7 @@ const Header: React.FC = () => {
   <TouchableOpacity onPress={() => router.push('./profile')}>
     {userData?.profile_image ? (
       <Image
-        source={{ uri: `${userData.profile_image}` }}
+        source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }}
         style={styles.profileImage}
         onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
       />

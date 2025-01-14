@@ -1,5 +1,5 @@
 const apiConfig = require('../configs/apiConfig');
-const pool = require('../server');
+const pool = require('../db');
 const multer = require('multer');
 
 
@@ -13,7 +13,7 @@ const uploadProfileImage = async (req, res) => {
       console.log('Uploaded File:', req.file);
   
       const userId = req.user.id;
-      const imagePath = `${apiConfig.BASE_URL}/uploads/profileImage/${req.file.filename}`;
+      const imagePath = `/uploads/profileImage/${req.file.filename}`;
       console.log("Image Path:", imagePath);
       await pool.query('UPDATE users SET profile_image = $1 WHERE id = $2', [imagePath, userId]);
   
@@ -347,8 +347,26 @@ const getFriends = async (req, res) => {
       return res.status(500).json({ message: 'Internal server error' });
     }
   };
+  const getUserById = async (req, res) => {
+    const userId = req.params.id;
+    console.log('Requested userId:', userId);
+    try {
+      const result = await pool.query(
+        'SELECT username, profile_image, about FROM users WHERE id = $1',
+        [userId]
+      );
+      if (result.rows.length === 0) {
+        console.warn('User not found in the database:', userId);
+        return res.status(404).json({ message: 'User not found' });
+      }
+      res.status(200).json(result.rows[0]);
+    } catch (err) {
+      console.error('Database Error:', err.message); 
+      res.status(500).json({ message: 'Server Error', error: err.message });
+    }
+  };
   
-  module.exports = {getFriendIdFromChat ,isFriend ,removeFriend ,getContactDetails, uploadProfileImage, updateProfile, getUserDetails, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests};
+  module.exports = {getUserById,getFriendIdFromChat ,isFriend ,removeFriend ,getContactDetails, uploadProfileImage, updateProfile, getUserDetails, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests};
 
 
   

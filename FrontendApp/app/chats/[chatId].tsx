@@ -1,3 +1,5 @@
+//chat
+
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -24,7 +26,7 @@ const Chat = () => {
   }
 
   const openImageModal = (imageUri: string) => {
-    setSelectedImage(imageUri);
+    setSelectedImage(`${imageUri}`);
     setModalVisible(true);
   };
   const closeImageModal = () => {
@@ -57,61 +59,44 @@ const Chat = () => {
     }
   };
 
-  const sendMedia = async (uri: string, chatId: string) => {
+  const sendMedia = async (uri: string, chatId: string | string[]) => {
     try {
-      console.log("--- Sending Media ---");
-      console.log("Media URI:", uri);
-      console.log("Chat ID:", chatId);
+      const token = await AsyncStorage.getItem("token");
   
       const formData = new FormData();
-  
-      console.log("Fetching media blob...");
-      const response = await fetch(uri);
-      if (!response.ok) {
-        throw new Error("Failed to fetch image from URI");
-      }
-      const blob = await response.blob();
-      console.log("Blob fetched:", blob);
-  
-      formData.append("media", {
-        uri,
-        type: "image/jpeg",
-        name: "media.jpg",
-      } as any);
-  
+      const mediaResponse = await fetch(uri);
+      const blob = await mediaResponse.blob();
+      formData.append("media", blob, "media.jpg");
       formData.append("chatId", String(chatId));
-      console.log("FormData prepared:", Array.from(formData.entries()));
   
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication token not found");
-      }
-      console.log("Token being used:", token);
+      console.log("FormData being sent:", Array.from(formData.entries())); 
   
-      console.log("Sending request to server...");
-      const res = await fetch(`${apiConfig.BASE_URL}/api/chats/send-media`, {
+      
+      const response = await fetch(`${apiConfig.BASE_URL}/api/chats/send-media`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${token}`, 
         },
         body: formData,
       });
   
-      console.log("Server responded with status:", res.status);
-      const data = await res.json();
-      console.log("Response data:", data);
-  
-      if (res.ok) {
-        console.log("Media sent successfully:", data);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("Media uploaded successfully:", data);
       } else {
-        console.error("Error sending media:", data.message || "Unknown error");
+        console.error("Error Response:", data);
+        throw new Error(data.message || "Failed to upload media");
       }
     } catch (error) {
-      console.error("Error uploading media:", error);
+      if (error instanceof Error) {
+        console.error("Error sending media:", error.message);
+      } else {
+        console.error("Error sending media:", error);
+      }
     }
   };
   
-
+  
   const scrollToBottom = (animated = true) => {
       flatListRef.current?.scrollToEnd({ animated });
   };
@@ -240,7 +225,7 @@ const sendMessage = async () => {
          <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
         <Image
-          source={{ uri: chatDetails.friend_profile_image }}
+          source={{ uri: `${apiConfig.BASE_URL}${chatDetails.friend_profile_image}` }}
           style={GlobalStyles.profileImage}
         />
         <TouchableOpacity onPress={() => router.push({ pathname: `../profile/${chatDetails.friend_id}` })}>
@@ -266,7 +251,7 @@ const sendMessage = async () => {
         >
           <TouchableOpacity onPress={() => openImageModal(item.content)}>
             <Image
-              source={{ uri: item.content }}
+              source={{ uri: `${apiConfig.BASE_URL}${item.content}` }}
               style={GlobalStyles.media}
               resizeMode="cover"
               onError={(e) =>
@@ -330,7 +315,7 @@ const sendMessage = async () => {
     <View style={styles.modalBackground}>
       {selectedImage ? (
         <Image
-          source={{ uri: selectedImage }}
+          source={{ uri: `${apiConfig.BASE_URL}${selectedImage}` }}
           style={styles.fullImage}
           resizeMode="contain"
         />

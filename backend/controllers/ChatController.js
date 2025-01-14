@@ -1,5 +1,5 @@
 const apiConfig = require('../configs/apiConfig');
-const pool = require('../server');
+const pool = require('../db');
 
 
 const getChats = async (req, res) => {
@@ -173,7 +173,8 @@ const getChatDetails = async (req, res) => {
       }
   
       const senderId = req.user.id;
-      const mediaPath = `${apiConfig.BASE_URL}/uploads/media/${req.file.filename}`;
+      const mediaPath = `/uploads/media/${req.file.filename}`;
+      const fullMediaPath = `${process.env.BASE_URL}/uploads/media/${req.file.filename}`;
       console.log("Chat ID:", chatId);
       console.log("Sender ID:", senderId);
       console.log("Media Path:", mediaPath);
@@ -182,8 +183,10 @@ const getChatDetails = async (req, res) => {
         'INSERT INTO messages (chat_id, sender_id, type, text, content) VALUES ($1, $2, $3, $4, $5)',
         [chatId, senderId, 'media', '[Media]', mediaPath]
       );
+
+      
   
-      res.json({ message: "Media sent successfully", mediaPath });
+      res.json({ message: "Media sent successfully", fullMediaPath });
     } catch (err) {
       console.error("Error uploading media:", err);
       res.status(500).json({ message: "Server Error" });
