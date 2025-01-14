@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post("/upload-image",authenticateToken,(req, res, next) => {console.log("Processing upload request");next();},upload.single("groupImage"),uploadGroupImage);
 router.post("/create", authenticateToken, createGroup);
-router.get("/members/:groupId", authenticateToken, getGroupMembers);
+router.get("/:groupId/members", authenticateToken, getGroupMembers);
 router.delete("/delete/:groupId", authenticateToken, deleteGroup);
 router.post("/add-member/:groupId", authenticateToken, addGroupMember);
 router.delete("/remove-member/:groupId", authenticateToken, removeGroupMember);

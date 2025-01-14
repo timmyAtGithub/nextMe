@@ -28,7 +28,7 @@ const LoginScreen: React.FC = () => {
 
       if (response.status === 200) {
         const { token } = response.data;
-        
+
         await AsyncStorage.setItem('token', token);
 
         console.log('Login successful:', response.data);

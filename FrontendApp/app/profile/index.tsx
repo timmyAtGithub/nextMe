@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, Button, StyleSheet, Alert,} from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, Button, StyleSheet, Alert, } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; 
+import { useRouter } from 'expo-router';
 import styles from '../styles/profileStyles';
 import apiConfig from '../configs/apiConfig';
 import * as FileSystem from 'expo-file-system';
@@ -12,7 +12,7 @@ import * as ImageManipulator from 'expo-image-manipulator';
 
 
 const Profile: React.FC = () => {
-  const router = useRouter(); 
+  const router = useRouter();
   const [userData, setUserData] = useState<{
     username: string;
     profileImage: string;
@@ -32,11 +32,11 @@ const Profile: React.FC = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (!response.ok) {
         throw new Error('Failed to fetch user data');
       }
-  
+
       const data = await response.json();
       console.log('User Data:', data);
       setUserData(data);
@@ -44,7 +44,7 @@ const Profile: React.FC = () => {
       console.error('Error fetching user data:', error);
     }
   };
-  
+
 
   useEffect(() => {
     fetchUserData();
@@ -53,19 +53,19 @@ const Profile: React.FC = () => {
   const uploadImage = async (uri: string) => {
     try {
       console.log("Starting uploadImage with URI:", uri);
-  
+
       const formData = new FormData();
       const response = await fetch(uri);
       const blob = await response.blob();
-      formData.append("profileImage", blob, "profile.jpg");  
+      formData.append("profileImage", blob, "profile.jpg");
       console.log("FormData prepared:", Array.from(formData.entries()));
-  
+
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert("Error", "Authentication token not found");
         return;
       }
-  
+
       const uploadResponse = await fetch(
         `${apiConfig.BASE_URL}/api/user/upload-profile-image`,
         {
@@ -76,10 +76,10 @@ const Profile: React.FC = () => {
           body: formData,
         }
       );
-  
+
       const data = await uploadResponse.json();
       console.log("Response from server:", data);
-  
+
       if (uploadResponse.ok) {
         Alert.alert("Success", "Image uploaded successfully");
       } else {
@@ -90,8 +90,8 @@ const Profile: React.FC = () => {
       Alert.alert("Error", "An unexpected error occurred during upload");
     }
   };
-  
-  
+
+
   const prepareFileForUpload = async (uri: string) => {
     try {
       const fileUri = `${FileSystem.documentDirectory}temp.jpg`;
@@ -105,7 +105,7 @@ const Profile: React.FC = () => {
       throw error;
     }
   };
-  
+
   const resizeImage = async (uri: string) => {
     try {
       const resizedImage = await ImageManipulator.manipulateAsync(
@@ -119,7 +119,7 @@ const Profile: React.FC = () => {
       throw error;
     }
   };
-  
+
   const handleResizeAndUpload = async (uri: string) => {
     try {
       const resizedUri = await resizeImage(uri);
@@ -128,7 +128,7 @@ const Profile: React.FC = () => {
       console.error('Error during resizing and upload:', error);
     }
   };
-  
+
   const pickImage = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
@@ -136,7 +136,7 @@ const Profile: React.FC = () => {
         allowsEditing: true,
         quality: 1,
       });
-  
+
       if (!result.canceled) {
         console.log('Selected image:', result.assets[0].uri);
         await handleResizeAndUpload(result.assets[0].uri);
@@ -150,7 +150,7 @@ const Profile: React.FC = () => {
       Alert.alert('Error', 'An error occurred while picking the image');
     }
   };
-  
+
   const handleEdit = (field: 'username' | 'about') => {
     setEditing({ field, value: userData ? userData[field] : '' });
   };
@@ -165,7 +165,7 @@ const Profile: React.FC = () => {
         },
         body: JSON.stringify({ field, value }),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         console.log('Profile updated successfully:', data);
@@ -179,7 +179,7 @@ const Profile: React.FC = () => {
       console.error('Error:', error);
     }
   };
-  
+
   if (!userData) {
     return <Text>Loading...</Text>;
   }
@@ -191,12 +191,12 @@ const Profile: React.FC = () => {
         onPress={() => router.push('/chats')}
       >
         <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-       
+
       </TouchableOpacity>
 
       <TouchableOpacity onPress={pickImage}>
-        
-      <Image source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }}style={styles.profileImage}/>
+
+        <Image source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }} style={styles.profileImage} />
 
       </TouchableOpacity>
       <Button title="Edit Image" onPress={pickImage} />

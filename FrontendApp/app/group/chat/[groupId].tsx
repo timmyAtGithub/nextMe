@@ -1,16 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  TouchableWithoutFeedback,
-  Modal,
-  Alert,
-} from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert, } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import GlobalStyles from '../../styles/globalStyles';
@@ -23,8 +12,8 @@ interface Message {
   text: string;
   sender_id: number;
   created_at: string;
-  content?: string; 
-  type?: string;   
+  content?: string;
+  type?: string;
   sender_name: string;
 }
 
@@ -57,70 +46,85 @@ const GroupChat = () => {
   const [isModalVisible, setModalVisible] = useState(false);
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-    if (!result.canceled && groupId) {
-      sendMedia(result.assets[0].uri, String(groupId));
-    }
-  };
-
-  const getUserById = async (userId: number) => {
     try {
-      console.log('Fetching user with ID:', userId); 
-  
-      const token = await AsyncStorage.getItem('token');
-      const response = await fetch(`${apiConfig.BASE_URL}/api/user/${userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      console.log("Starting image picker...");
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
       });
-  
-      console.log('Response status:', response.status); 
-  
-      if (!response.ok) {
-        throw new Error('Failed to fetch user');
+
+      console.log("ImagePicker result:", result);
+
+      if (!result.canceled && result.assets && result.assets[0].uri) {
+        const imageUri = result.assets[0].uri;
+        console.log("Selected Image URI:", imageUri);
+
+        await sendMedia(imageUri, Array.isArray(groupId) ? groupId[0] : groupId);
+      } else {
+        console.log("Image selection canceled or no URI found.");
       }
-  
-      return await response.json();
     } catch (error) {
-      console.error('Error fetching user:', error);
-      throw error;
+      console.error("Error in pickImage:", error);
+      Alert.alert("Error", "Failed to select image. Please try again.");
     }
   };
-  
 
-
-
-  const sendMedia = async (uri: string, groupId: string) => {
+  const sendMedia = async (uri: string, groupId: string | string[]) => {
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
+
+      if (!uri) {
+        throw new Error("Invalid URI");
+      }
+
+      console.log("Preparing to fetch media:", uri);
       const formData = new FormData();
-  
-      const mediaResponse = await fetch(uri);
-      const blob = await mediaResponse.blob();
-      formData.append('media', blob, 'media.jpg'); 
-      formData.append('groupId', groupId);
-  
+      formData.append("media", {
+        uri: uri,
+        type: "image/jpeg",
+        name: "media.jpg"
+      } as any);
+      formData.append("groupId", String(groupId));
+
+      console.log("FormData ready:", Array.from(formData.entries()));
+
       const response = await fetch(`${apiConfig.BASE_URL}/api/groups/send-media`, {
-        method: 'POST',
+        method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
-  
-      if (!response.ok) {
-        throw new Error('Failed to upload media');
+
+      console.log("Upload Response Status:", response.status);
+
+      let responseData;
+      const responseText = await response.text();
+      console.log("Raw response text:", responseText);
+
+      try {
+        responseData = JSON.parse(responseText);
+        console.log("Parsed response data:", responseData);
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", parseError);
+        throw new Error("Invalid server response format");
       }
-  
-      const data = await response.json();
-      console.log('Media uploaded successfully:', data);
+
+      if (!response.ok) {
+        throw new Error(
+          responseData?.message || `Server Error: ${response.status}`
+        );
+      }
+
+      return responseData;
     } catch (error) {
-      console.error('Error uploading media:', error);
+      console.error("Error in sendMedia:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      Alert.alert("Error", errorMessage);
+      throw error;
     }
   };
-  
 
   const scrollToBottom = (animated = true) => {
     flatListRef.current?.scrollToEnd({ animated });
@@ -158,12 +162,12 @@ const GroupChat = () => {
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-  
+
         console.log("Response status for group details:", response.status);
-  
+
         if (response.ok) {
           const data = await response.json();
-          console.log("Fetched group details:", data); 
+          console.log("Fetched group details:", data);
           setGroupDetails(data);
         } else {
           console.error('Failed to fetch group details');
@@ -172,15 +176,15 @@ const GroupChat = () => {
         console.error('Error fetching group details:', error);
       }
     };
-  
+
     if (groupId) fetchGroupDetails();
   }, [groupId]);
-  
+
   useEffect(() => {
     const fetchMessages = async () => {
       try {
-      
-  
+
+
         const token = await AsyncStorage.getItem('token');
         if (!token) {
           console.error('Token not found in AsyncStorage');
@@ -188,47 +192,47 @@ const GroupChat = () => {
           return;
         }
         const response = await fetch(
-          
+
           `${apiConfig.BASE_URL}/api/groups/messagesWithName/${groupId}`,
           {
-            
+
             headers: { Authorization: `Bearer ${token}` },
           }
         );
-  
-        
-  
+
+
+
         if (!response.ok) {
           console.error('Failed to fetch messages. Status:', response.status);
           throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
-  
+
         const data = await response.json();
 
-  
+
         setMessages(data);
       } catch (err) {
         console.error('Error fetching messages:', err);
         Alert.alert('Error', 'An error occurred while fetching messages.');
       }
     };
-  
+
     if (groupId) {
       console.log('Initializing message fetch for groupId:', groupId);
       fetchMessages();
-  
+
       const interval = setInterval(() => {
         console.log('Interval triggered. Fetching messages...');
         fetchMessages();
       }, 2000);
-  
+
       return () => {
         console.log('Clearing interval for message fetching');
         clearInterval(interval);
       };
     }
   }, [groupId]);
-  
+
 
   const sendMessage = async () => {
     if (!newMessage.trim()) {
@@ -271,7 +275,7 @@ const GroupChat = () => {
 
 
   const ChatHeader: React.FC<ChatHeaderProps> = ({ groupName, groupImage, onBack }) => {
-    
+
     return (
       <View style={styles.headerContainer}>
         <TouchableOpacity onPress={onBack} style={styles.backButton}>
@@ -284,28 +288,28 @@ const GroupChat = () => {
   };
 
 
-  
+
   return (
     <View style={[styles.container, GlobalStyles.background]}>
-    <View style={[GlobalStyles.header]}>
-  <TouchableOpacity onPress={() => router.push('/chats')}>
-    <Ionicons name="arrow-back" size={24} color="#FFF" />
-  </TouchableOpacity>
-  
-  {(() => {
-    console.log("Group Image URL:", groupDetails?.group_image_url);
-    return (
-      <Image
-        source={{ uri: `${apiConfig.BASE_URL}${groupDetails?.group_image_url}` }}
-        style={GlobalStyles.profileImage}
-      />
-    );
-  })()}
+      <View style={[GlobalStyles.header]}>
+        <TouchableOpacity onPress={() => router.push('/chats')}>
+          <Ionicons name="arrow-back" size={24} color="#FFF" />
+        </TouchableOpacity>
 
-  <TouchableOpacity onPress={() => router.push({ pathname: `../details/${groupId}` })}>
-    <Text style={GlobalStyles.title}>{groupDetails?.name}</Text>
-  </TouchableOpacity>
-</View>
+        {(() => {
+          console.log("Group Image URL:", groupDetails?.group_image_url);
+          return (
+            <Image
+              source={{ uri: `${apiConfig.BASE_URL}${groupDetails?.group_image_url}` }}
+              style={GlobalStyles.profileImage}
+            />
+          );
+        })()}
+
+        <TouchableOpacity onPress={() => router.push({ pathname: `../details/${groupId}` })}>
+          <Text style={GlobalStyles.title}>{groupDetails?.name}</Text>
+        </TouchableOpacity>
+      </View>
 
       <FlatList
         ref={flatListRef}
@@ -313,13 +317,13 @@ const GroupChat = () => {
         keyExtractor={(item) => item.id.toString()}
         renderItem={({ item }) => {
           const isMyMessage = item.user_id === userId;
-          
-               if (item.type === 'media') {
+
+          if (item.type === 'media') {
             return (
               <View style={isMyMessage ? GlobalStyles.rightBubble : GlobalStyles.leftBubble}>
-                  <Text style={GlobalStyles.Bubbletext}>
-                    {item.username}:
-                  </Text>
+                <Text style={GlobalStyles.Bubbletext}>
+                  {item.username}:
+                </Text>
                 <TouchableOpacity onPress={() => openImageModal(item.content ?? '')}>
                   <Image source={{ uri: `${apiConfig.BASE_URL}${item.content}` }} style={GlobalStyles.media} />
                 </TouchableOpacity>
@@ -329,7 +333,7 @@ const GroupChat = () => {
           return (
             <View style={isMyMessage ? GlobalStyles.rightBubble : GlobalStyles.leftBubble}>
               <Text style={GlobalStyles.Bubbletext}>
-                {item.username}: 
+                {item.username}:
               </Text>
               <Text style={GlobalStyles.Bubbletext}>
                 {item.text}

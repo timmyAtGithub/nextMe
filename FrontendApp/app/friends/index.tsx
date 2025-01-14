@@ -12,29 +12,29 @@ const Friends: React.FC = () => {
   const [friendRequests, setFriendRequests] = useState<{ id: string | number; profile_image: string; sender_name: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const router = useRouter();
-  
+
   const openOrCreateChat = async (friendId: string | number) => {
     try {
-        const token = await AsyncStorage.getItem('token');
-        const response = await fetch(`${apiConfig.BASE_URL}/api/chats/start`, {
-            method: 'POST',
-            headers: {
-                Authorization: `Bearer ${token}`,
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ friendId }),
-        });
+      const token = await AsyncStorage.getItem('token');
+      const response = await fetch(`${apiConfig.BASE_URL}/api/chats/start`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ friendId }),
+      });
 
-        if (response.ok) {
-            const chatData = await response.json();
-            router.push(`../chats/${chatData.id}`);
-        } else {
-            console.error('Failed to open or create chat');
-        }
+      if (response.ok) {
+        const chatData = await response.json();
+        router.push(`../chats/${chatData.id}`);
+      } else {
+        console.error('Failed to open or create chat');
+      }
     } catch (error) {
-        console.error('Error opening or creating chat:', error);
+      console.error('Error opening or creating chat:', error);
     }
-};
+  };
   useEffect(() => {
     const fetchFriendsAndRequests = async () => {
       try {
@@ -119,11 +119,11 @@ const Friends: React.FC = () => {
       friend.name &&
       friend.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
+
 
   return (
     <View style={styles.container}>
-        <Header />
+      <Header />
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchBar}
@@ -133,9 +133,9 @@ const Friends: React.FC = () => {
           onChangeText={setSearchQuery}
         />
         <TouchableOpacity style={styles.addButton} onPress={() => router.push('/friends/add')}>
-          <Ionicons name="add-circle-outline" size={30} color="#FFF" /> 
+          <Ionicons name="add-circle-outline" size={30} color="#FFF" />
         </TouchableOpacity>
-      </View>   
+      </View>
 
       <Text style={styles.sectionHeader}>Friend Requests</Text>
       <FlatList

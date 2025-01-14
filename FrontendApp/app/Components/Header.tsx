@@ -53,25 +53,25 @@ const Header: React.FC = () => {
   }
 
   return (
-<View style={styles.header}>
-  <TouchableOpacity onPress={() => router.push('./profile')}>
-    {userData?.profile_image ? (
-      <Image
-        source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }}
-        style={styles.profileImage}
-        onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
-      />
-    ) : (
-      <View style={[styles.profileImage, styles.placeholderImage]}>
-        <Text style={styles.placeholderText}>?</Text>
-      </View>
-    )}
-  </TouchableOpacity>
-  <Text style={styles.username}>{userData?.username}</Text>
-  <TouchableOpacity onPress={() => router.push('./friends')}>
-    <Ionicons name="people-outline" size={24} color="#FFFFFF" />
-  </TouchableOpacity>
-</View>
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => router.push('./profile')}>
+        {userData?.profile_image ? (
+          <Image
+            source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }}
+            style={styles.profileImage}
+            onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
+          />
+        ) : (
+          <View style={[styles.profileImage, styles.placeholderImage]}>
+            <Text style={styles.placeholderText}>?</Text>
+          </View>
+        )}
+      </TouchableOpacity>
+      <Text style={styles.username}>{userData?.username}</Text>
+      <TouchableOpacity onPress={() => router.push('./friends')}>
+        <Ionicons name="people-outline" size={24} color="#FFFFFF" />
+      </TouchableOpacity>
+    </View>
 
   );
 };

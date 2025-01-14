@@ -1,16 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  TouchableOpacity,
-  Alert,
-  Modal,
-  StyleSheet,
-  ActivityIndicator,
-  ImageErrorEventData,
-  NativeSyntheticEvent,
-} from 'react-native';
+import { View, Text, Image, TouchableOpacity, Alert, Modal, StyleSheet, ActivityIndicator, ImageErrorEventData, NativeSyntheticEvent, } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -226,19 +215,19 @@ const ContactDetails = () => {
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity 
-        style={styles.backButton} 
+      <TouchableOpacity
+        style={styles.backButton}
         onPress={() => router.back()}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Ionicons name="arrow-back" size={24} color="#FFF" />
       </TouchableOpacity>
-  
-        <ProfileImage uri={`${apiConfig.BASE_URL}${contactData.profile_image}`} />
-  
+
+      <ProfileImage uri={`${apiConfig.BASE_URL}${contactData.profile_image}`} />
+
       <Text style={styles.contactName}>{contactData.username || 'Unknown'}</Text>
       <Text style={styles.contactAbout}>{contactData.about || 'No details available'}</Text>
-  
+
       <TouchableOpacity
         style={[styles.removeButton, isLoading && styles.removeButtonDisabled]}
         onPress={() => setShowModal(true)}
@@ -253,25 +242,25 @@ const ContactDetails = () => {
           </>
         )}
       </TouchableOpacity>
-      <TouchableOpacity 
-  style={styles.createGroupButton}
-    onPress={() => router.push({
-    pathname: '/group/groupCreation',
-    params: { preselectedFriend: contactId }, 
-  })}
->
-  <Ionicons name="people-outline" size={20} color="#FFF" />
-  <Text style={styles.buttonText}>Create Group</Text>
-</TouchableOpacity>
+      <TouchableOpacity
+        style={styles.createGroupButton}
+        onPress={() => router.push({
+          pathname: '/group/groupCreation',
+          params: { preselectedFriend: contactId },
+        })}
+      >
+        <Ionicons name="people-outline" size={20} color="#FFF" />
+        <Text style={styles.buttonText}>Create Group</Text>
+      </TouchableOpacity>
 
-  
+
       <ConfirmationModal
         visible={showModal}
         onCancel={() => setShowModal(false)}
         onConfirm={removeFriend}
       />
     </View>
-  );  
+  );
 };
 
 const styles = StyleSheet.create({
@@ -441,7 +430,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     minWidth: 180,
   },
-  
+
 });
 
 export default ContactDetails;

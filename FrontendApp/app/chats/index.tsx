@@ -1,13 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { 
-  View, 
-  Text, 
-  FlatList, 
-  Image, 
-  StyleSheet, 
-  TouchableOpacity,
-  Alert
-} from 'react-native';
+import { View, Text, FlatList, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import BottomNavigation from '../Components/BottomNavigation';
 import Header from '../Components/Header';
@@ -19,6 +11,7 @@ interface Chat {
   friend_profile_image?: string;
   friend_username?: string;
   lastMessage: string;
+  lastMessageTimestamp: string;
   type: 'private' | 'group';
   group_name?: string;
   group_image_url?: string;
@@ -47,19 +40,43 @@ const ChatsOverview: React.FC = () => {
         if (privateChatsResponse.ok && groupChatsResponse.ok) {
           const privateChats = await privateChatsResponse.json();
           const groupChats = await groupChatsResponse.json();
+          console.log("Fetched group chats:", groupChats);
+          console.log("Fetched private chats:", privateChats);
 
           const combinedChats = [
-            ...privateChats.map((chat: any) => ({ ...chat, type: 'private' })),
+            ...privateChats.map((chat: any) => ({
+              ...chat,
+              lastMessage: chat.lastmessage,
+              lastMessageTimestamp: chat.lastmessagetime,
+              type: 'private',
+            })),
             ...groupChats.map((group: any) => ({
               id: group.id,
               group_name: group.group_name,
               group_image_url: group.group_image_url,
-              lastMessage: group.lastMessage || '',
+              lastMessage: group.lastmessage,
+              lastMessageTimestamp: group.lastmessagetimestamp,
               type: 'group',
             })),
+
           ];
 
-          setChats(combinedChats);
+
+          console.log('Combined chats before sorting:', combinedChats);
+
+          const sortedChats = combinedChats.sort((a, b) => {
+            const dateA = new Date(a.lastMessageTimestamp).getTime();
+            const dateB = new Date(b.lastMessageTimestamp).getTime();
+
+
+            if (isNaN(dateA)) return 1;
+            if (isNaN(dateB)) return -1;
+
+            return dateB - dateA;
+          });
+
+          console.log('Sorted chats:', sortedChats);
+          setChats(sortedChats);
         } else {
           console.error('Failed to fetch chats');
         }
@@ -70,6 +87,7 @@ const ChatsOverview: React.FC = () => {
 
     fetchChats();
   }, []);
+
 
   const handleChatPress = async (chat: Chat) => {
     if (chat.type === 'private') {
@@ -127,7 +145,7 @@ const ChatsOverview: React.FC = () => {
         method: 'GET',
         headers: { Authorization: `Bearer ${token}` },
       });
-  
+
       if (response.ok) {
         const data = await response.json();
         return data.friendId;
@@ -164,28 +182,44 @@ const ChatsOverview: React.FC = () => {
     }
   };
 
+  const renderChat = ({ item }: { item: Chat }) => {
+    const imageUrl = item.type === 'private'
+      ? item.friend_profile_image?.startsWith('/')
+        ? `${apiConfig.BASE_URL}${item.friend_profile_image}`
+        : item.friend_profile_image
+      : item.group_image_url?.startsWith('/')
+        ? `${apiConfig.BASE_URL}${item.group_image_url}`
+        : item.group_image_url;
 
-  const renderChat = ({ item }: { item: Chat }) => (
-    
-    <TouchableOpacity
-      style={styles.chatItem}
-      onPress={() => handleChatPress(item)}
-    >
+    return (
+      <TouchableOpacity
+        style={styles.chatItem}
+        onPress={() => handleChatPress(item)}
+      >
+        <Image
+          source={{ uri: imageUrl }}
+          style={styles.profileImage}
+          onError={(e) => console.error('Image Load Error:', e.nativeEvent.error)}
+        />
+        <View style={styles.chatDetails}>
+          <Text style={styles.friendName}>
+            {item.type === 'private' ? item.friend_username : item.group_name}
+          </Text>
+          <Text style={styles.lastMessage}>
+            {item.lastMessage || 'No messages yet'}
+            {item.lastMessageTimestamp !== '1970-01-01T00:00:00.000Z' && (
+              <Text style={styles.lastMessageTime}>
+                {' '}• {new Date(item.lastMessageTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </Text>
+            )}
+          </Text>
 
-<Image 
-  source={{ uri: item.type === 'private' ? `${apiConfig.BASE_URL}${item.friend_profile_image}` : `${apiConfig.BASE_URL}${item.group_image_url}` }} 
-  style={styles.profileImage} 
-/>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
 
-      <View style={styles.chatDetails}>
-        <Text style={styles.friendName}>{
-          item.type === 'private' ? item.friend_username : item.group_name
-        }</Text>
-        <Text style={styles.lastMessage}>{item.lastMessage}</Text>
-      </View>
-    </TouchableOpacity>
-  );
 
   return (
     <View style={styles.container}>
@@ -236,6 +270,12 @@ const styles = StyleSheet.create({
   lastMessage: {
     color: '#AAAAAA',
     marginTop: 5,
+    fontSize: 14,
+    flexDirection: 'row',
+  },
+  lastMessageTime: {
+    color: '#888888',
+    fontSize: 12,
   },
   emptyText: {
     color: '#FFFFFF',

@@ -9,25 +9,25 @@ const BottomNavigation: React.FC = () => {
     <View style={styles.navigation}>
       <TouchableOpacity onPress={() => router.push('/chats')}>
         <Image
-          source={require('../assets/chats-icon.png')} 
+          source={require('../assets/chats-icon.png')}
           style={styles.navIcon}
         />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/camera')}>
         <Image
-          source={require('../assets/camera-icon.png')} 
+          source={require('../assets/camera-icon.png')}
           style={styles.navIcon}
         />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/pictures')}>
         <Image
-          source={require('../assets/pictures-icon.png')} 
+          source={require('../assets/pictures-icon.png')}
           style={styles.navIcon}
         />
       </TouchableOpacity>
       <TouchableOpacity onPress={() => router.push('/settings')}>
         <Image
-          source={require('../assets/settings-icon.png')} 
+          source={require('../assets/settings-icon.png')}
           style={styles.navIcon}
         />
       </TouchableOpacity>
