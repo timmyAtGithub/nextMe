@@ -59,7 +59,7 @@ const loginUser = async (req, res) => {
 
 const getCurrentUser = async (req, res) => {
   try {
-    const userId = req.user.id; 
+    const userId = req.user.id;
     const result = await pool.query(
       `SELECT id, username, profile_image FROM users WHERE id = $1`,
       [userId]
@@ -76,5 +76,5 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
-module.exports = { loginUser, registerUser, getCurrentUser }; 
+module.exports = { loginUser, registerUser, getCurrentUser };
 

@@ -1,15 +1,5 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  ActivityIndicator,
-  Alert,
-} from "react-native";
+import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Image, ActivityIndicator, Alert, } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -103,7 +93,7 @@ const GroupCreation = () => {
     try {
       const resizedImage = await ImageManipulator.manipulateAsync(
         uri,
-        [{ resize: { width: 800 } }], 
+        [{ resize: { width: 800 } }],
         { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
       );
       return resizedImage.uri;
@@ -113,7 +103,7 @@ const GroupCreation = () => {
     }
   };
 
-  
+
   const uploadImage = async (uri: string) => {
     setIsUploading(true);
     try {
@@ -124,7 +114,7 @@ const GroupCreation = () => {
         name: "groupImage.jpg",
       } as any;
       formData.append("groupImage", file);
-  
+
       const token = await AsyncStorage.getItem("token");
       const response = await fetch(`${apiConfig.BASE_URL}/api/groups/upload-image`, {
         method: "POST",
@@ -133,10 +123,10 @@ const GroupCreation = () => {
         },
         body: formData,
       });
-      
+
       const responseText = await response.text();
       console.log("Raw response:", responseText);
-      
+
       let data;
       console.log("DATA", data);
       try {
@@ -146,7 +136,7 @@ const GroupCreation = () => {
         console.error("Failed to parse response as JSON:", parseError);
         throw new Error("Invalid response format from server");
       }
-      
+
       if (!response.ok) {
         throw new Error(data.message || "Upload failed");
       }
@@ -180,15 +170,15 @@ const GroupCreation = () => {
         aspect: [1, 1],
         quality: 1,
       });
-  
+
       console.log("Image picker result:", result);
-      
+
       if (!result.canceled && result.assets[0].uri) {
         console.log("Image selected, starting resize...");
         const resizedUri = await resizeImage(result.assets[0].uri);
         console.log("Image resized successfully:", resizedUri);
         setGroupImage(resizedUri);
-  
+
         console.log("Starting upload process...");
         const uploadedUrl = await uploadImage(resizedUri);
         if (uploadedUrl) {
@@ -210,7 +200,7 @@ const GroupCreation = () => {
     }
   };
 
-  
+
   const [userId, setUserId] = useState<number | null>(null);
 
   useEffect(() => {
@@ -227,44 +217,44 @@ const GroupCreation = () => {
 
     fetchUserId();
   }, []);
-  
+
   const createGroup = async () => {
     if (!groupName.trim()) {
       Alert.alert("Error", "Please enter a group name.");
       return;
     }
-  
+
     if (!userId) {
       Alert.alert("Error", "User ID not found. Please log in again.");
       return;
     }
-  
-    const allMembers = [...new Set([...selectedFriends, userId])]; 
-  
+
+    const allMembers = [...new Set([...selectedFriends, userId])];
+
     if (allMembers.length === 0) {
       Alert.alert("Error", "Please select at least one friend.");
       return;
     }
-  
+
     if (!uploadedImageUrl) {
       Alert.alert("Error", "Please upload a group image before proceeding.");
       return;
     }
-  
+
     setIsLoading(true);
     try {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         throw new Error("Authentication token not found");
       }
-  
+
       const payload = {
         name: groupName.trim(),
         description: groupDescription.trim(),
-        members: allMembers, 
+        members: allMembers,
         groupImageUrl: uploadedImageUrl,
       };
-  
+
       const response = await fetch(`${apiConfig.BASE_URL}/api/groups/create`, {
         method: "POST",
         headers: {
@@ -273,11 +263,11 @@ const GroupCreation = () => {
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) {
         throw new Error("Failed to create group");
       }
-  
+
       const data: GroupCreateResponse = await response.json();
       Alert.alert("Success", "Group created successfully!", [
         { text: "OK", onPress: () => router.push({ pathname: `./chat/${data.group.id}` }) },
@@ -288,7 +278,7 @@ const GroupCreation = () => {
     } finally {
       setIsLoading(false);
     }
-  };  
+  };
 
   if (isLoading) {
     return (
@@ -366,7 +356,7 @@ const GroupCreation = () => {
         style={[
           styles.createButton,
           (!groupName.trim() || selectedFriends.length === 0) &&
-            styles.createButtonDisabled,
+          styles.createButtonDisabled,
         ]}
         onPress={createGroup}
         disabled={!groupName.trim() || selectedFriends.length === 0 || isLoading}

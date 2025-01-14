@@ -1,5 +1,3 @@
-//chat
-
 import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -8,6 +6,7 @@ import GlobalStyles from '../styles/globalStyles';
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import apiConfig from '../configs/apiConfig';
+import { ImageManipulator } from 'expo-image-manipulator';
 
 const Chat = () => {
   const router = useRouter();
@@ -43,62 +42,92 @@ const Chat = () => {
   const [chatDetails, setChatDetails] = useState<ChatDetails | null>(null);
   const [newMessage, setNewMessage] = useState('');
   const [userId, setUserId] = useState<number | null>(null);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null); 
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
-  
+
 
   const pickImage = async () => {
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      quality: 1,
-    });
-  
-    if (!result.canceled) {
-      sendMedia(result.assets[0].uri, Array.isArray(chatId) ? chatId[0] : chatId);
+    try {
+      console.log("Starting image picker...");
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        quality: 1,
+      });
+
+      console.log("ImagePicker result:", result);
+
+      if (!result.canceled && result.assets && result.assets[0].uri) {
+        const imageUri = result.assets[0].uri;
+        console.log("Selected Image URI:", imageUri);
+
+        await sendMedia(imageUri, Array.isArray(chatId) ? chatId[0] : chatId);
+      } else {
+        console.log("Image selection canceled or no URI found.");
+      }
+    } catch (error) {
+      console.error("Error in pickImage:", error);
+      Alert.alert("Error", "Failed to select image. Please try again.");
     }
   };
 
   const sendMedia = async (uri: string, chatId: string | string[]) => {
     try {
       const token = await AsyncStorage.getItem("token");
-  
+
+      if (!uri) {
+        throw new Error("Invalid URI");
+      }
+
+      console.log("Preparing to fetch media:", uri);
       const formData = new FormData();
-      const mediaResponse = await fetch(uri);
-      const blob = await mediaResponse.blob();
-      formData.append("media", blob, "media.jpg");
+      formData.append("media", {
+        uri: uri,
+        type: "image/jpeg",
+        name: "media.jpg"
+      } as any);
       formData.append("chatId", String(chatId));
-  
-      console.log("FormData being sent:", Array.from(formData.entries())); 
-  
-      
+
+      console.log("FormData ready:", Array.from(formData.entries()));
+
       const response = await fetch(`${apiConfig.BASE_URL}/api/chats/send-media`, {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`, 
+          Authorization: `Bearer ${token}`,
         },
         body: formData,
       });
-  
-      const data = await response.json();
-      if (response.ok) {
-        console.log("Media uploaded successfully:", data);
-      } else {
-        console.error("Error Response:", data);
-        throw new Error(data.message || "Failed to upload media");
+
+      console.log("Upload Response Status:", response.status);
+
+      let responseData;
+      const responseText = await response.text();
+      console.log("Raw response text:", responseText);
+
+      try {
+        responseData = JSON.parse(responseText);
+        console.log("Parsed response data:", responseData);
+      } catch (parseError) {
+        console.error("Failed to parse response as JSON:", parseError);
+        throw new Error("Invalid server response format");
       }
+
+      if (!response.ok) {
+        throw new Error(
+          responseData?.message || `Server Error: ${response.status}`
+        );
+      }
+
+      return responseData;
     } catch (error) {
-      if (error instanceof Error) {
-        console.error("Error sending media:", error.message);
-      } else {
-        console.error("Error sending media:", error);
-      }
+      console.error("Error in sendMedia:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unexpected error occurred.";
+      Alert.alert("Error", errorMessage);
+      throw error;
     }
   };
-  
-  
   const scrollToBottom = (animated = true) => {
-      flatListRef.current?.scrollToEnd({ animated });
+    flatListRef.current?.scrollToEnd({ animated });
   };
 
   useEffect(() => {
@@ -109,7 +138,7 @@ const Chat = () => {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
 
         if (response.ok) {
           const data = await response.json();
@@ -129,7 +158,7 @@ const Chat = () => {
           method: 'GET',
           headers: { Authorization: `Bearer ${token}` },
         });
-       
+
 
         if (response.ok) {
           const data = await response.json();
@@ -155,7 +184,7 @@ const Chat = () => {
         });
         if (response.status === 403) {
           Alert.alert('Error', 'You are not allowed to access this chat.');
-          router.push('/chats'); 
+          router.push('/chats');
           return;
         }
         if (!response.ok) throw new Error('Failed to fetch messages');
@@ -168,204 +197,201 @@ const Chat = () => {
     };
     fetchMessages();
     const interval = setInterval(() => {
-        fetchMessages();
-    }, 500); 
+      fetchMessages();
+    }, 500);
 
     return () => clearInterval(interval);
-}, [chatId]);
+  }, [chatId]);
 
 
-const sendMessage = async () => {
-  if (!newMessage.trim()) {
-    console.error('Message is empty. Cannot send.');
-    return;
-  }
-
-  try {
-    const token = await AsyncStorage.getItem('token');
-    if (!token) {
-      console.error('Token not found');
+  const sendMessage = async () => {
+    if (!newMessage.trim()) {
+      console.error('Message is empty. Cannot send.');
       return;
     }
 
-    console.log('Sending message with chatId:', chatId);
-    console.log('Message text:', newMessage);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        console.error('Token not found');
+        return;
+      }
 
-    const response = await fetch(`${apiConfig.BASE_URL}/api/chats/messages`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ chatId, text: newMessage }),
-    });
+      console.log('Sending message with chatId:', chatId);
+      console.log('Message text:', newMessage);
 
-    const data = await response.json();
+      const response = await fetch(`${apiConfig.BASE_URL}/api/chats/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ chatId, text: newMessage }),
+      });
 
-    if (response.ok) {
-      console.log('Message sent successfully:', data);
-      setMessages((prevMessages) => [...prevMessages, data]);
-      setNewMessage('');
-      scrollToBottom();
-    } else {
-      console.error('Failed to send message:', data.message || data);
+      const data = await response.json();
+
+      if (response.ok) {
+        console.log('Message sent successfully:', data);
+        setMessages((prevMessages) => [...prevMessages, data]);
+        setNewMessage('');
+        scrollToBottom();
+      } else {
+        console.error('Failed to send message:', data.message || data);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
     }
-  } catch (error) {
-    console.error('Error sending message:', error);
-  }
-};
-
-  console.log('Chat Details: ', chatDetails);
+  };
 
   return (
     <View style={[styles.container, GlobalStyles.background]}>
-    {chatDetails && (
-      <View style={[GlobalStyles.header]}>
-        <TouchableOpacity onPress={() => router.push('/chats')}>
-         <Ionicons name="arrow-back" size={24} color="#FFF" />
-        </TouchableOpacity>
-        <Image
-          source={{ uri: `${apiConfig.BASE_URL}${chatDetails.friend_profile_image}` }}
-          style={GlobalStyles.profileImage}
-        />
-        <TouchableOpacity onPress={() => router.push({ pathname: `../profile/${chatDetails.friend_id}` })}>
-          <Text style={GlobalStyles.title}>{chatDetails.friend_username}</Text>
-        </TouchableOpacity>
+      {chatDetails && (
+        <View style={[GlobalStyles.header]}>
+          <TouchableOpacity onPress={() => router.push('/chats')}>
+            <Ionicons name="arrow-back" size={24} color="#FFF" />
+          </TouchableOpacity>
+          <Image
+            source={{ uri: `${apiConfig.BASE_URL}${chatDetails.friend_profile_image}` }}
+            style={GlobalStyles.profileImage}
+          />
+          <TouchableOpacity onPress={() => router.push({ pathname: `../profile/${chatDetails.friend_id}` })}>
+            <Text style={GlobalStyles.title}>{chatDetails.friend_username}</Text>
+          </TouchableOpacity>
 
-      </View>
-    )}
-<FlatList
-  ref={flatListRef}
-  data={messages}
-  keyExtractor={(item) => item.id.toString()}
-  renderItem={({ item }) => {
-    if (item.type === "media") {
-      console.log('Media content:', item.content);
-      return (
-        <View
-          style={
-            item.sender_id === userId
-              ? GlobalStyles.rightBubble
-              : GlobalStyles.leftBubble
+        </View>
+      )}
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={({ item }) => {
+          if (item.type === "media") {
+            return (
+              <View
+                style={
+                  item.sender_id === userId
+                    ? GlobalStyles.rightBubble
+                    : GlobalStyles.leftBubble
+                }
+              >
+                <TouchableOpacity onPress={() => openImageModal(item.content)}>
+                  <Image
+                    source={{ uri: `${apiConfig.BASE_URL}${item.content}` }}
+                    style={GlobalStyles.media}
+                    resizeMode="cover"
+                    onError={(e) =>
+                      console.error('Image load error:', e.nativeEvent.error)
+                    }
+                  />
+                </TouchableOpacity>
+              </View>
+            );
           }
-        >
-          <TouchableOpacity onPress={() => openImageModal(item.content)}>
-            <Image
-              source={{ uri: `${apiConfig.BASE_URL}${item.content}` }}
-              style={GlobalStyles.media}
-              resizeMode="cover"
-              onError={(e) =>
-                console.error('Image load error:', e.nativeEvent.error)
+          return (
+            <View
+              style={
+                item.sender_id === userId
+                  ? GlobalStyles.rightBubble
+                  : GlobalStyles.leftBubble
               }
-            />
+            >
+              <Text
+                style={
+                  item.sender_id === userId
+                    ? GlobalStyles.Bubbletext
+                    : GlobalStyles.Bubbletext
+                }
+              >
+                {item.text}
+              </Text>
+            </View>
+          );
+        }}
+        contentContainerStyle={styles.messageList}
+        onContentSizeChange={() => scrollToBottom(false)}
+      />
+
+      <View style={[GlobalStyles.inputContainer]}>
+        <TextInput
+          style={GlobalStyles.input}
+          placeholder="Type a message..."
+          value={newMessage}
+          onChangeText={setNewMessage}
+          placeholderTextColor="#888"
+        />
+        <TouchableOpacity
+          style={[GlobalStyles.button]}
+          onPress={sendMessage}
+        >
+          <Text style={GlobalStyles.buttonText}>Send</Text>
+        </TouchableOpacity>
+        <View style={GlobalStyles.mediaOptions}>
+          <TouchableOpacity onPress={pickImage}>
+            <MaterialIcons name="photo" size={24} color="#FFFF" />
           </TouchableOpacity>
         </View>
-      );
-    }
-    return (
-      <View
-        style={
-          item.sender_id === userId
-            ? GlobalStyles.rightBubble
-            : GlobalStyles.leftBubble
-        }
-      >
-        <Text
-          style={
-            item.sender_id === userId
-              ? GlobalStyles.Bubbletext
-              : GlobalStyles.Bubbletext
-          }
+        <Modal
+          visible={isModalVisible}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={closeImageModal}
         >
-          {item.text}
-        </Text>
+          <TouchableWithoutFeedback onPress={closeImageModal}>
+            <View style={styles.modalBackground}>
+              {selectedImage ? (
+                <Image
+                  source={{ uri: `${apiConfig.BASE_URL}${selectedImage}` }}
+                  style={styles.fullImage}
+                  resizeMode="contain"
+                />
+              ) : null}
+            </View>
+          </TouchableWithoutFeedback>
+        </Modal>
       </View>
-    );
-  }}
-  contentContainerStyle={styles.messageList}
-  onContentSizeChange={() => scrollToBottom(false)}
-/>
+    </View>
 
-    <View style={[GlobalStyles.inputContainer]}>
-      <TextInput
-        style={GlobalStyles.input}
-        placeholder="Type a message..."
-        value={newMessage}
-        onChangeText={setNewMessage}
-        placeholderTextColor="#888"
-      />
-      <TouchableOpacity
-        style={[GlobalStyles.button]}
-        onPress={sendMessage}
-      >
-        <Text style={GlobalStyles.buttonText}>Send</Text>
-      </TouchableOpacity>
-      <View style={GlobalStyles.mediaOptions}>
-  <TouchableOpacity onPress={pickImage}>
-    <MaterialIcons name="photo" size={24} color="#FFFF" />
-  </TouchableOpacity>
-      </View>
-      <Modal
-  visible={isModalVisible}
-  transparent={true}
-  animationType="fade"
-  onRequestClose={closeImageModal}
->
-  <TouchableWithoutFeedback onPress={closeImageModal}>
-    <View style={styles.modalBackground}>
-      {selectedImage ? (
-        <Image
-          source={{ uri: `${apiConfig.BASE_URL}${selectedImage}` }}
-          style={styles.fullImage}
-          resizeMode="contain"
-        />
-      ) : null}
-    </View>
-  </TouchableWithoutFeedback>
-</Modal>
-    </View>
-  </View>
-     
 
   );
 };
-  
+
 
 const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-    },
-    backButton: {
-      fontSize: 18,
-      color: '#007AFF',
-    },
-    profileImage: {
-      width: 40,
-      height: 40,
-      borderRadius: 20,
-      marginLeft: 10,
-    },
-    messageList: {
-      flexGrow: 1,
-      padding: 10,
-      paddingBottom: 20,
-    },
-    messageItem: {
-      padding: 10,
-      borderRadius: 10,
-      marginBottom: 10,
-    },
-    modalBackground: {
-      flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    fullImage: {
-      width: '90%',
-      height: '90%',
-    },
-    
+  container: {
+    flex: 1,
+  },
+  backButton: {
+    fontSize: 18,
+    color: '#007AFF',
+  },
+  profileImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    marginLeft: 10,
+  },
+  messageList: {
+    flexGrow: 1,
+    padding: 10,
+    paddingBottom: 20,
+  },
+  messageItem: {
+    padding: 10,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+  modalBackground: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullImage: {
+    width: '90%',
+    height: '90%',
+  },
+
 });
 
 export default Chat;
