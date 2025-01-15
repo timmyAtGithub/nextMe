@@ -64,8 +64,13 @@ const updateProfile = async (req, res) => {
 
 const getUserDetails = async (req, res) => {
   try {
+    if (!req.user || !req.user.id) {
+      console.error("User ID not found in request. User:", req.user);
+      return res.status(401).json({ message: "User ID not found. Please log in again." });
+    }
+
     const userId = req.user.id;
-    const result = await pool.query('SELECT username, profile_image, about FROM users WHERE id = $1', [userId]);
+    const result = await pool.query('SELECT id, username, profile_image, about FROM users WHERE id = $1', [userId]);
 
     if (result.rows.length === 0) {
       return res.status(404).json({ message: 'User not found' });
@@ -77,6 +82,7 @@ const getUserDetails = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
 
 const getContactDetails = async (req, res) => {
   try {

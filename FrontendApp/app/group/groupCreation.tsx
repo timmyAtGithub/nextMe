@@ -205,18 +205,30 @@ const GroupCreation = () => {
 
   useEffect(() => {
     const fetchUserId = async () => {
-      const token = await AsyncStorage.getItem("token");
-      if (token) {
-        const response = await fetch(`${apiConfig.BASE_URL}/api/user/profile`, {
+      try {
+        const token = await AsyncStorage.getItem("token");
+        if (!token) {
+          console.error("Token not found");
+          return;
+        }
+        console.log("Token:", token);
+        const response = await fetch(`${apiConfig.BASE_URL}/api/user/me`, {
           headers: { Authorization: `Bearer ${token}` },
         });
+        if (!response.ok) {
+          throw new Error(`API Error: ${response.status}`);
+        }
         const data = await response.json();
+        console.log("User data:", data);
         setUserId(data.id);
+      } catch (error) {
+        console.error("Failed to fetch user ID:", error);
       }
     };
-
     fetchUserId();
   }, []);
+  
+  
 
   const createGroup = async () => {
     if (!groupName.trim()) {
