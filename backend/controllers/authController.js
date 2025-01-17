@@ -75,6 +75,46 @@ const getCurrentUser = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.user?.id;
 
-module.exports = { loginUser, registerUser, getCurrentUser };
+  try {
+    if (!userId) {
+      console.error('Error: User ID is missing');
+      return res.status(401).json({ message: 'Unauthorized' });
+    }
+
+    const result = await pool.query('SELECT password FROM users WHERE id = $1', [userId]);
+    const user = result.rows[0];
+
+    if (!user) {
+      console.error(`Error: User with ID ${userId} not found`);
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const passwordMatch = await argon2.verify(user.password, currentPassword);
+    if (!passwordMatch) {
+      console.error(`Error: Incorrect current password for user ID ${userId}`);
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    const hashedPassword = await argon2.hash(newPassword);
+    await pool.query('UPDATE users SET password = $1 WHERE id = $2', [hashedPassword, userId]);
+
+    console.log(`Password successfully changed for user ID ${userId}`);
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (err) {
+    console.error('Error changing password:', {
+      message: err.message,
+      stack: err.stack,
+      requestData: { userId, currentPassword: '***', newPassword: '***' },
+    });
+    res.status(500).send('Server Error');
+  }
+};
+
+
+module.exports = { loginUser, registerUser, getCurrentUser, changePassword };
+
 
