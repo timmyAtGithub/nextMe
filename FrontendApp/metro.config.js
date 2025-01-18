@@ -1,12 +1,9 @@
-const { getDefaultConfig } = require('@expo/metro-config');
+const { getDefaultConfig } = require('expo/metro-config');
 
-const config = getDefaultConfig(__dirname, {
-  resolver: {
-    unstable_enablePackageExports: true
-  }
-});
+const defaultConfig = getDefaultConfig(__dirname);
 
-config.transformer.unstable_allowRequireContext = true;
-config.resolver.unstable_enablePackageExports = true;
+defaultConfig.resolver.extraNodeModules = {
+  url: require.resolve('react-native-url-polyfill'),
+};
 
-module.exports = config;
+module.exports = defaultConfig;

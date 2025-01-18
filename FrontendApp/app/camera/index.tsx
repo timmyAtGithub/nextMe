@@ -1,9 +1,20 @@
-import PhotoPreviewSection from '../Components/PhotoPreviewSection';
+import 'react-native-gesture-handler';
+import React, { useRef, useState } from 'react';
+import {
+  Button,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  Alert
+} from 'react-native';
+
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
-import { useRef, useState } from 'react';
-import { Button, StyleSheet, Text, TouchableOpacity, View, Alert } from 'react-native';
+
+import PhotoPreviewSection from '../Components/PhotoPreviewSection';
 import BottomNavigation from '../Components/BottomNavigation';
 
 export default function Camera() {
@@ -36,7 +47,7 @@ export default function Camera() {
   }
 
   function toggleCameraFacing() {
-    setFacing(current => (current === 'back' ? 'front' : 'back'));
+    setFacing((current) => (current === 'back' ? 'front' : 'back'));
   }
 
   const handleTakePhoto = async () => {
@@ -66,28 +77,32 @@ export default function Camera() {
 
   if (photo) {
     return (
-      <PhotoPreviewSection
-        photo={photo}
-        handleRetakePhoto={handleRetakePhoto}
-        handleSavePhoto={handleSavePhoto}
-      />
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <PhotoPreviewSection
+          photo={photo}
+          handleRetakePhoto={handleRetakePhoto}
+          handleSavePhoto={handleSavePhoto}
+        />
+      </GestureHandlerRootView>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
-            <AntDesign name="retweet" size={44} color="black" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
-            <AntDesign name="camera" size={44} color="black" />
-          </TouchableOpacity>
-        </View>
-      </CameraView>
-      <BottomNavigation />
-    </View>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <View style={styles.container}>
+        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+              <AntDesign name="retweet" size={44} color="black" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
+              <AntDesign name="camera" size={44} color="black" />
+            </TouchableOpacity>
+          </View>
+        </CameraView>
+        <BottomNavigation />
+      </View>
+    </GestureHandlerRootView>
   );
 }
 
