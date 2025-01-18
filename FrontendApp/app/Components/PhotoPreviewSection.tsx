@@ -25,15 +25,19 @@ const DraggableScalableText = ({
   onUpdateText,
   isEditing,
   setIsEditing,
+  initialX,
+  initialY,
 }: {
   text: string;
   fontFamily: string;
   onUpdateText: (text: string) => void;
   isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
+  initialX: number;
+  initialY: number;
 }) => {
-  const translateX = useSharedValue(0);
-  const translateY = useSharedValue(0);
+  const translateX = useSharedValue(initialX);
+  const translateY = useSharedValue(initialY);;
   const rotation = useSharedValue(0);
 
   const hasBorder = FONTS_WITH_BORDER.includes(fontFamily);
@@ -181,8 +185,8 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }) => {
         text: '',
         fontFamily: selectedFont,
         isEditing: true,
-        initialX: width / 2 - 50,
-        initialY: height / 2 - 20,
+        initialX: 0,
+        initialY: height / 4,
       },
     ]);
   };
@@ -331,8 +335,11 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }) => {
                   handleChangeFont(element.id, selectedFont);
                 }}
                 onUpdateText={(newText) => handleUpdateText(element.id, newText)}
+                initialX={element.initialX}
+                initialY={element.initialY}
               />
             ))}
+
           </View>
           {mode === 'draw' && (
             <View style={styles.colorPicker}>
