@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Text, Image, TouchableOpacity, Modal, ScrollView } from 'react-native';
+import { StyleSheet, View, Text, Image, TouchableOpacity, Modal, ScrollView, Dimensions } from 'react-native';
 
 const ImageListScreen = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-//hier noch passende Var eintragen  -v-
+
   const receivedImages = [
-    { id: 1, sender: 'Alice', message: 'Whats up bro', imageUrl: require('../assets/images/image1.png') },
-    { id: 2, sender: 'Bob', message: 'Look at that dumptruck', imageUrl: require('../assets/images/image2.png') },
-    { id: 3, sender: 'Charlie', message: 'Cops in LA are different', imageUrl: require('../assets/images/image3.png') },
+    { id: 1, sender: 'Alice', message: 'Das ist ein Beispieltext 1', distance: '220 m', imageUrl: require('../assets/images/image1.png') },
+    { id: 2, sender: 'Bob', message: 'Das ist ein Beispieltext 2', distance: '350 m', imageUrl: require('../assets/images/image2.png') },
+    { id: 3, sender: 'Charlie', message: 'Das ist ein Beispieltext 3', distance: '120 m', imageUrl: require('../assets/images/image3.png') },
   ];
 
   const openImage = (image) => {
@@ -21,15 +21,18 @@ const ImageListScreen = () => {
     setSelectedImage(null);
   };
 
+  const { width, height } = Dimensions.get('window'); // Bildschirmgröße
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {receivedImages.map((item) => (
-        <TouchableOpacity key={item.id} style={styles.imageContainer} onPress={() => openImage(item.imageUrl)}>
+        <TouchableOpacity key={item.id} style={styles.imageContainer} onPress={() => openImage(item)}>
           <Image source={item.imageUrl} style={styles.imagePreview} />
           <View style={styles.textContainer}>
             <Text style={styles.senderName}>{item.sender}</Text>
             <Text style={styles.messageText}>{item.message}</Text>
           </View>
+          <Text style={styles.distanceText}>{item.distance}</Text> {/* Meterangabe anzeigen */}
         </TouchableOpacity>
       ))}
 
@@ -42,10 +45,14 @@ const ImageListScreen = () => {
           onRequestClose={closeImage}
         >
           <View style={styles.modalContainer}>
-            <TouchableOpacity style={styles.modalClose} onPress={closeImage}>
-              <Text style={styles.modalCloseText}>Schließen</Text>
+            <Image source={selectedImage.imageUrl} style={[styles.fullScreenImage, { width, height }]} />
+            <View style={styles.overlayContainer}>
+              <Text style={styles.overlaySender}>{selectedImage.sender}</Text>
+              <Text style={styles.overlayDistance}>{selectedImage.distance}</Text>
+            </View>
+            <TouchableOpacity style={styles.closeButton} onPress={closeImage}>
+              <Text style={styles.closeButtonText}>Schließen</Text>
             </TouchableOpacity>
-            <Image source={selectedImage} style={styles.fullImage} />
           </View>
         </Modal>
       )}
@@ -91,28 +98,52 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#555',
   },
+  distanceText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#333',
+    marginLeft: 8,
+  },
   modalContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  modalClose: {
+  fullScreenImage: {
+    resizeMode: 'contain', // sorgt dafür, dass das Bild vollständig sichtbar bleibt
+  },
+  overlayContainer: {
+    position: 'absolute',
+    bottom: 40,
+    left: 20,
+    right: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    borderRadius: 8,
+    padding: 10,
+    alignItems: 'center',
+  },
+  overlaySender: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 4,
+  },
+  overlayDistance: {
+    fontSize: 16,
+    color: '#fff',
+  },
+  closeButton: {
     position: 'absolute',
     top: 40,
     right: 20,
-    backgroundColor: '#fff',
+    backgroundColor: '#e74c3c',
     padding: 10,
     borderRadius: 20,
   },
-  modalCloseText: {
+  closeButtonText: {
+    color: '#fff',
     fontSize: 16,
-    color: '#000',
-  },
-  fullImage: {
-    width: '90%',
-    height: '70%',
-    resizeMode: 'contain',
   },
 });
 
