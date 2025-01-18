@@ -20,7 +20,7 @@ const SettingsScreen = () => {
         <Button title="Passwort ändern" onPress={() => router.push('./settings/changePassword')} />
       </View>
       <View style={styles.buttonContainer}>
-        <Button title="About" onPress={() => {}} />
+        <Button title="About" onPress={() => router.push('./settings/about')} />
       </View>
       <View style={styles.buttonContainer}>
         <Button title="App-Theme" onPress={() => router.push('./settings/apptheme')} />
