@@ -1,75 +1,452 @@
-import { Fontisto, AntDesign } from '@expo/vector-icons';
-import { CameraCapturedPicture } from 'expo-camera';
-import React from 'react';
-import { TouchableOpacity, SafeAreaView, Image, StyleSheet, View, Text } from 'react-native';
+import React, { useState, useRef } from 'react';
+import {
+  TouchableOpacity, Image, StyleSheet, View, Text, TextInput, Dimensions, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, PanResponder,
+} from 'react-native';
+import { AntDesign, MaterialIcons } from '@expo/vector-icons';
+import Animated, { useSharedValue, useAnimatedStyle, } from 'react-native-reanimated';
+import { GestureHandlerRootView, Gesture, GestureDetector, } from 'react-native-gesture-handler';
+import { captureRef } from 'react-native-view-shot';
+import Svg, { Path } from 'react-native-svg';
+import * as MediaLibrary from 'expo-media-library';
 
-const PhotoPreviewSection = ({
-  photo,
-  handleRetakePhoto,
-  handleSavePhoto,
+const { width, height } = Dimensions.get('window');
+
+const FONTS_WITH_BORDER = ['Arial', 'Courier', 'Times', 'Verdana'];
+
+interface PathDefinition {
+  points: { x: number; y: number }[];
+  color: string;
+  width: number;
+}
+
+const DraggableScalableText = ({
+  text,
+  fontFamily,
+  onUpdateText,
+  isEditing,
+  setIsEditing,
 }: {
-  photo: CameraCapturedPicture;
-  handleRetakePhoto: () => void;
-  handleSavePhoto: () => void;
-}) => (
-  <SafeAreaView style={styles.container}>
-    <View style={styles.box}>
-      <Image
-        style={styles.previewContainer}
-        source={{ uri: 'data:image/jpg;base64,' + photo.base64 }}
-      />
-    </View>
+  text: string;
+  fontFamily: string;
+  onUpdateText: (text: string) => void;
+  isEditing: boolean;
+  setIsEditing: (isEditing: boolean) => void;
+}) => {
+  const translateX = useSharedValue(0);
+  const translateY = useSharedValue(0);
+  const rotation = useSharedValue(0);
 
-    <View style={styles.buttonContainer}>
-      <TouchableOpacity style={styles.button} onPress={handleRetakePhoto}>
-        <Fontisto name="trash" size={36} color="black" />
-        <Text>Leck Eier</Text>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={handleSavePhoto}>
-        <AntDesign name="save" size={36} color="black" />
-        <Text>Speechern</Text>
-      </TouchableOpacity>
-    </View>
-  </SafeAreaView>
-);
+  const hasBorder = FONTS_WITH_BORDER.includes(fontFamily);
+
+  const panGesture = Gesture.Pan()
+    .onUpdate((event) => {
+      translateX.value = hasBorder ? 0 : event.translationX;
+      translateY.value = event.translationY;
+    })
+    .onEnd(() => {
+      if (hasBorder) {
+        translateX.value = 0;
+      }
+    });
+
+  const pinchGesture = Gesture.Pinch().onUpdate((event) => {
+    if (!hasBorder) {
+      rotation.value = event.rotation;
+    }
+  });
+
+  const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: translateX.value },
+      { translateY: translateY.value },
+      { rotateZ: `${rotation.value}rad` },
+    ],
+  }));
+
+  return (
+    <GestureDetector gesture={composedGesture}>
+      <Animated.View
+        style={[
+          styles.draggableText,
+          animatedStyle,
+          hasBorder && styles.textWithBorder,
+        ]}
+      >
+        <TouchableOpacity activeOpacity={1} onPress={() => setIsEditing(true)}>
+          <View style={styles.textBoxFullWidth}>
+            {isEditing ? (
+              <TextInput
+                style={[
+                  styles.textElement,
+                  {
+                    fontFamily,
+                    maxWidth: width - 20,
+                  },
+                ]}
+                autoFocus
+                value={text}
+                onChangeText={onUpdateText}
+                onBlur={() => setIsEditing(false)}
+                multiline
+                scrollEnabled={false}
+              />
+            ) : (
+              <Text
+                style={[
+                  styles.textElement,
+                  {
+                    fontFamily,
+                    maxWidth: width - 20,
+                  },
+                ]}
+              >
+                {text || 'Tap to add text'}
+              </Text>
+            )}
+          </View>
+        </TouchableOpacity>
+      </Animated.View>
+    </GestureDetector>
+  );
+};
+
+const PhotoPreviewSection = ({ photo, handleRetakePhoto }) => {
+  const [mode, setMode] = useState<'text' | 'draw' | null>(null);
+  const [paths, setPaths] = useState<PathDefinition[]>([]);
+  const [currentPath, setCurrentPath] = useState<PathDefinition | null>(null);
+  const [selectedColor, setSelectedColor] = useState('red');
+  const [selectedFont, setSelectedFont] = useState('System');
+  const [textElements, setTextElements] = useState<
+    { id: string; text: string; fontFamily: string; isEditing: boolean }[]
+  >([]);
+
+  const colors = [
+    'red',
+    '#FF69B4',
+    '#FFA500',
+    '#FFFF00',
+    '#00FF00',
+    '#00FFFF',
+    '#0000FF',
+    '#800080',
+  ];
+
+  const imageContainerRef = useRef<View>(null);
+
+  const pointsToSvgPath = (points: { x: number; y: number }[]) => {
+    if (points.length === 0) return '';
+    return (
+      `M ${points[0].x},${points[0].y} ` +
+      points.slice(1).map((p) => `L ${p.x},${p.y}`).join(' ')
+    );
+  };
+
+  const drawingPanResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => mode === 'draw',
+    onMoveShouldSetPanResponder: () => mode === 'draw',
+
+    onPanResponderGrant: (evt) => {
+      const { locationX, locationY } = evt.nativeEvent;
+      setCurrentPath({
+        points: [{ x: locationX, y: locationY }],
+        color: selectedColor,
+        width: 3,
+      });
+    },
+
+    onPanResponderMove: (evt) => {
+      if (!currentPath) return;
+      const { locationX, locationY } = evt.nativeEvent;
+      setCurrentPath({
+        ...currentPath,
+        points: [...currentPath.points, { x: locationX, y: locationY }],
+      });
+    },
+
+    onPanResponderRelease: () => {
+      if (currentPath) {
+        setPaths((prev) => [...prev, currentPath]);
+        setCurrentPath(null);
+      }
+    },
+  });
+
+  const handleAddText = () => {
+    setTextElements((prev) => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        text: '',
+        fontFamily: selectedFont,
+        isEditing: true,
+        initialX: width / 2 - 50,
+        initialY: height / 2 - 20,
+      },
+    ]);
+  };
+
+
+  const handleUpdateText = (id, newText) => {
+    setTextElements((prev) =>
+      prev.map((elem) => (elem.id === id ? { ...elem, text: newText } : elem))
+    );
+  };
+
+  const handleChangeFont = (id, newFont) => {
+    setTextElements((prev) =>
+      prev.map((elem) =>
+        elem.id === id
+          ? {
+            ...elem,
+            fontFamily: newFont,
+          }
+          : elem
+      )
+    );
+  };
+
+  const handleSavePhoto = async () => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to access camera roll is required!');
+        return;
+      }
+
+      const uri = await captureRef(imageContainerRef, {
+        format: 'png',
+        quality: 1,
+        result: 'tmpfile',
+      });
+
+
+      if (uri) {
+        const asset = await MediaLibrary.createAssetAsync(uri);
+        alert('Bild gespeichert in deiner Galerie!\n' + asset.uri);
+      }
+    } catch (error) {
+      console.error('Error saving photo', error);
+    }
+  };
+
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <KeyboardAvoidingView
+          style={styles.container}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
+          <View style={styles.header}>
+            <TouchableOpacity onPress={handleRetakePhoto}>
+              <AntDesign name="close" size={24} color="white" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setSelectedFont('Arial')}
+              style={styles.toolButton}
+            >
+              <Text style={{ color: 'white' }}>Arial</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedFont('Courier')}
+              style={styles.toolButton}
+            >
+              <Text style={{ color: 'white' }}>Courier</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedFont('Times')}
+              style={styles.toolButton}
+            >
+              <Text style={{ color: 'white' }}>Times</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => setSelectedFont('Verdana')}
+              style={styles.toolButton}
+            >
+              <Text style={{ color: 'white' }}>Verdana</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity onPress={handleAddText} style={styles.toolButton}>
+              <MaterialIcons name="text-fields" size={24} color="white" />
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={() => setMode(mode === 'draw' ? null : 'draw')}
+              style={styles.toolButton}
+            >
+              <MaterialIcons name="brush" size={24} color="white" />
+            </TouchableOpacity>
+          </View>
+          <View
+            style={styles.imageContainer}
+            {...drawingPanResponder.panHandlers}
+            ref={imageContainerRef}
+          >
+            <Image
+              style={styles.image}
+              source={{
+                uri: photo.base64
+                  ? `data:image/jpg;base64,${photo.base64}`
+                  : photo.uri,
+              }}
+            />
+            {paths.map((path, index) => {
+              const d = pointsToSvgPath(path.points);
+              return (
+                <Svg key={index} style={StyleSheet.absoluteFill}>
+                  <Path
+                    d={d}
+                    stroke={path.color}
+                    strokeWidth={path.width}
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </Svg>
+              );
+            })}
+
+            {currentPath && (
+              <Svg style={StyleSheet.absoluteFill}>
+                <Path
+                  d={pointsToSvgPath(currentPath.points)}
+                  stroke={currentPath.color}
+                  strokeWidth={currentPath.width}
+                  fill="none"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </Svg>
+            )}
+            {textElements.map((element) => (
+              <DraggableScalableText
+                key={element.id}
+                text={element.text}
+                fontFamily={element.fontFamily}
+                isEditing={element.isEditing}
+                setIsEditing={(isEditing) => {
+                  if (!isEditing) setSelectedFont(element.fontFamily);
+                  handleChangeFont(element.id, selectedFont);
+                }}
+                onUpdateText={(newText) => handleUpdateText(element.id, newText)}
+              />
+            ))}
+          </View>
+          {mode === 'draw' && (
+            <View style={styles.colorPicker}>
+              {colors.map((color) => (
+                <TouchableOpacity
+                  key={color}
+                  style={[styles.colorOption, { backgroundColor: color }]}
+                  onPress={() => setSelectedColor(color)}
+                />
+              ))}
+            </View>
+          )}
+
+          <View>
+            <TouchableOpacity style={styles.sendButton} onPress={handleSavePhoto}>
+              <Text style={styles.sendButtonText}>Send</Text>
+            </TouchableOpacity>
+          </View>
+        </KeyboardAvoidingView>
+      </TouchableWithoutFeedback>
+    </GestureHandlerRootView>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black',
-    alignItems: 'center',
-    justifyContent: 'center',
   },
-  box: {
-    borderRadius: 10,
-    padding: 1,
-    width: '95%',
-    height: '85%',
-    backgroundColor: 'white',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  previewContainer: {
-    width: '95%',
-    height: '85%',
-    borderRadius: 10,
-  },
-  buttonContainer: {
-    marginTop: '4%',
+  header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    width: '100%',
-    paddingHorizontal: 20,
-  },
-  button: {
-    backgroundColor: 'white',
-    borderRadius: 10,
-    padding: 10,
     alignItems: 'center',
-    justifyContent: 'center',
+    position: 'absolute',
+    top: 10,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 15,
+    zIndex: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 10,
+  },
+  toolButton: {
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    marginLeft: 5,
+  },
+  imageContainer: {
     flex: 1,
-    marginHorizontal: 10,
+    position: 'relative',
+    margin: 0,
+    padding: 0,
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    aspectRatio: 'auto',
+    resizeMode: 'cover',
+  },
+  colorPicker: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    position: 'absolute',
+    bottom: 80,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 10,
+    zIndex: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 10,
+  },
+  colorOption: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    marginHorizontal: 5,
+  },
+  sendButton: {
+    position: 'absolute',
+    bottom: 20,
+    alignSelf: 'center',
+    backgroundColor: 'rgba(52, 152, 219, 0.8)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  sendButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  draggableText: {
+    position: 'absolute',
+    zIndex: 10,
+  },
+  textElement: {
+    color: 'white',
+    fontSize: 22,
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.75)',
+    textShadowOffset: { width: 1, height: 1 },
+    textShadowRadius: 2,
+    padding: 5,
+  },
+  textWithBorder: {
+    alignSelf: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    width: width,
+  },
+  textBoxFullWidth: {
+    alignSelf: 'center',
   },
 });
+
 
 export default PhotoPreviewSection;
