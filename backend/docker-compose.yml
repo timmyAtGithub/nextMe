@@ -5,6 +5,7 @@ services:
     build: .
     ports:
       - "5000:5000"
+      - "4040:4040"
     environment:
       - DB_HOST=db
       - DB_USER=user
@@ -16,6 +17,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      
 
   db:
     image: postgres:14

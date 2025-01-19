@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, Button, StyleSheet, Alert, } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, Button, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,8 +8,6 @@ import styles from '../styles/profileStyles';
 import apiConfig from '../configs/apiConfig';
 import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
-
-
 
 const Profile: React.FC = () => {
   const router = useRouter();
@@ -22,10 +20,16 @@ const Profile: React.FC = () => {
     field: '',
     value: null,
   });
+  const [isUploading, setIsUploading] = useState(false);
 
   const fetchUserData = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Error', 'No authentication token found');
+        return;
+      }
+
       const response = await fetch(`${apiConfig.BASE_URL}/api/user/me`, {
         method: 'GET',
         headers: {
@@ -34,129 +38,129 @@ const Profile: React.FC = () => {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user data');
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const data = await response.json();
-      console.log('User Data:', data);
       setUserData(data);
     } catch (error) {
       console.error('Error fetching user data:', error);
+      Alert.alert('Error', 'Failed to load user data');
     }
   };
-
 
   useEffect(() => {
     fetchUserData();
   }, []);
 
-  const uploadImage = async (uri: string) => {
+  const uploadImage = async (uri: string): Promise<boolean> => {
     try {
-      console.log("Starting uploadImage with URI:", uri);
+      setIsUploading(true);
+      
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Error', 'Authentication token not found');
+        return false;
+      }
 
       const formData = new FormData();
-      const response = await fetch(uri);
-      const blob = await response.blob();
-      formData.append("profileImage", blob, "profile.jpg");
-      console.log("FormData prepared:", Array.from(formData.entries()));
-
-      const token = await AsyncStorage.getItem("token");
-      if (!token) {
-        Alert.alert("Error", "Authentication token not found");
-        return;
-      }
+      formData.append('profileImage', {
+        uri: uri,
+        type: 'image/jpeg',
+        name: 'profile.jpg',
+      } as any);
 
       const uploadResponse = await fetch(
         `${apiConfig.BASE_URL}/api/user/upload-profile-image`,
         {
-          method: "POST",
+          method: 'POST',
           headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'multipart/form-data',
             Authorization: `Bearer ${token}`,
           },
           body: formData,
         }
       );
 
-      const data = await uploadResponse.json();
-      console.log("Response from server:", data);
-
-      if (uploadResponse.ok) {
-        Alert.alert("Success", "Image uploaded successfully");
-      } else {
-        Alert.alert("Error", data.message || "Failed to upload the image");
+      if (!uploadResponse.ok) {
+        throw new Error(`Upload failed with status ${uploadResponse.status}`);
       }
-    } catch (error) {
-      console.error("Error occurred during image upload:", error);
-      Alert.alert("Error", "An unexpected error occurred during upload");
-    }
-  };
 
-
-  const prepareFileForUpload = async (uri: string) => {
-    try {
-      const fileUri = `${FileSystem.documentDirectory}temp.jpg`;
-      await FileSystem.copyAsync({
-        from: uri,
-        to: fileUri,
-      });
-      return fileUri;
+      const data = await uploadResponse.json();
+      await fetchUserData(); 
+      return true;
     } catch (error) {
-      console.error('Error preparing file for upload:', error);
+      console.error('Upload error:', error);
       throw error;
+    } finally {
+      setIsUploading(false);
     }
   };
 
-  const resizeImage = async (uri: string) => {
+  const resizeImage = async (uri: string): Promise<string> => {
     try {
-      const resizedImage = await ImageManipulator.manipulateAsync(
+      const result = await ImageManipulator.manipulateAsync(
         uri,
         [{ resize: { width: 800 } }],
-        { compress: 0.8, format: ImageManipulator.SaveFormat.JPEG }
+        { 
+          compress: 0.8, 
+          format: ImageManipulator.SaveFormat.JPEG 
+        }
       );
-      return resizedImage.uri;
+      return result.uri;
     } catch (error) {
       console.error('Error resizing image:', error);
       throw error;
     }
   };
 
-  const handleResizeAndUpload = async (uri: string) => {
-    try {
-      const resizedUri = await resizeImage(uri);
-      await uploadImage(resizedUri);
-    } catch (error) {
-      console.error('Error during resizing and upload:', error);
-    }
-  };
-
   const pickImage = async () => {
     try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      
+      if (!permissionResult.granted) {
+        Alert.alert('Permission needed', 'Please grant permission to access your photos');
+        return;
+      }
+
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
         allowsEditing: true,
         quality: 1,
+        aspect: [1, 1],
       });
 
-      if (!result.canceled) {
-        console.log('Selected image:', result.assets[0].uri);
-        await handleResizeAndUpload(result.assets[0].uri);
+      if (!result.canceled && result.assets[0]) {
+        try {
+          const resizedUri = await resizeImage(result.assets[0].uri);
+          const uploadSuccess = await uploadImage(resizedUri);
+          
+          if (uploadSuccess) {
+            Alert.alert('Success', 'Profile image updated successfully');
+          }
+        } catch (error) {
+          Alert.alert('Error', 'Failed to process and upload the image');
+        }
       }
     } catch (error) {
-      if (error instanceof Error) {
-        console.error('Error picking image:', error.message);
-      } else {
-        console.error('Error picking image:', error);
-      }
-      Alert.alert('Error', 'An error occurred while picking the image');
+      console.error('Error in pickImage:', error);
+      Alert.alert('Error', 'Failed to select image');
     }
   };
 
   const handleEdit = (field: 'username' | 'about') => {
     setEditing({ field, value: userData ? userData[field] : '' });
   };
+
   const handleSave = async (field: 'username' | 'about', value: string) => {
     try {
       const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Error', 'No authentication token found');
+        return;
+      }
+
       const response = await fetch(`${apiConfig.BASE_URL}/api/user/edit-profile`, {
         method: 'POST',
         headers: {
@@ -166,22 +170,26 @@ const Profile: React.FC = () => {
         body: JSON.stringify({ field, value }),
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        console.log('Profile updated successfully:', data);
-        Alert.alert('Success', `${field} updated successfully`);
-        setEditing({ field: '', value: null });
-        fetchUserData();
-      } else {
-        console.error('Error updating profile:', data.message);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
       }
+
+      const data = await response.json();
+      Alert.alert('Success', `${field} updated successfully`);
+      setEditing({ field: '', value: null });
+      await fetchUserData();
     } catch (error) {
-      console.error('Error:', error);
+      console.error('Error saving profile:', error);
+      Alert.alert('Error', 'Failed to update profile');
     }
   };
 
   if (!userData) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.container}>
+        <Text>Loading...</Text>
+      </View>
+    );
   }
 
   return (
@@ -191,15 +199,27 @@ const Profile: React.FC = () => {
         onPress={() => router.push('/chats')}
       >
         <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
-
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={pickImage}>
-
-        <Image source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }} style={styles.profileImage} />
-
+      <TouchableOpacity 
+        onPress={pickImage}
+        disabled={isUploading}
+      >
+        <Image 
+          source={{ 
+            uri: userData.profile_image.startsWith('http') 
+              ? userData.profile_image 
+              : `${apiConfig.BASE_URL}${userData.profile_image}` 
+          }} 
+          style={styles.profileImage} 
+        />
       </TouchableOpacity>
-      <Button title="Edit Image" onPress={pickImage} />
+      
+      <Button 
+        title={isUploading ? "Uploading..." : "Edit Image"} 
+        onPress={pickImage}
+        disabled={isUploading}
+      />
 
       {editing.field === 'username' ? (
         <View>
@@ -216,12 +236,14 @@ const Profile: React.FC = () => {
           <Button title="Edit" onPress={() => handleEdit('username')} />
         </View>
       )}
+
       {editing.field === 'about' ? (
         <View>
           <TextInput
             style={styles.input}
             value={editing.value || ''}
             onChangeText={(text) => setEditing({ field: 'about', value: text })}
+            multiline
           />
           <Button title="Save" onPress={() => handleSave('about', editing.value || '')} />
         </View>
