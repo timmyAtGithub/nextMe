@@ -101,7 +101,7 @@ const ContactDetails = () => {
 
       const token = await AsyncStorage.getItem('token');
       if (!token) {
-        router.push('/login');
+        router.push('./login');
         return;
       }
 
@@ -117,7 +117,7 @@ const ContactDetails = () => {
 
       if (response.status === 401) {
         await AsyncStorage.removeItem('token');
-        router.push('/login');
+        router.push('./login');
         return;
       }
 
@@ -143,7 +143,7 @@ const ContactDetails = () => {
       const token = await AsyncStorage.getItem('token');
       if (!token) {
         Alert.alert('Error', 'Authentication required');
-        router.push('/login');
+        router.push('./login');
         return;
       }
 
@@ -162,7 +162,7 @@ const ContactDetails = () => {
 
       if (response.status === 401) {
         await AsyncStorage.removeItem('token');
-        router.push('/login');
+        router.push('./login');
         return;
       }
 

@@ -7,7 +7,7 @@ import apiConfig from '../configs/apiConfig';
 
 
 const Header: React.FC = () => {
-  const [userData, setUserData] = useState<{ username: string; profileImage: string } | null>(null);
+  const [userData, setUserData] = useState<{ username: string; profile_image: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
@@ -39,7 +39,7 @@ const Header: React.FC = () => {
   }, []);
   console.log('Frontend userData:', userData);
   console.log('User Data:', userData);
-  console.log('Profile Image URL:', userData?.profileImage);
+  console.log('Profile Image URL:', userData?.profile_image);
 
 
 
@@ -78,11 +78,18 @@ const Header: React.FC = () => {
 
 const styles = StyleSheet.create({
   header: {
+    zIndex: 1,
+    position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 15,
+    left: 0,
+    right: 0,
     backgroundColor: '#121212',
+    width: '100%',
+    height: '7%',
+    top: 0,
   },
   profileImage: {
     width: 40,

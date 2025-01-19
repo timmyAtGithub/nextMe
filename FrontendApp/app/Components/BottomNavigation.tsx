@@ -37,11 +37,16 @@ const BottomNavigation: React.FC = () => {
 
 const styles = StyleSheet.create({
   navigation: {
+    position: 'absolute',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
     padding: 10,
     backgroundColor: '#121212',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: '100%',
   },
   navIcon: {
     width: 30,

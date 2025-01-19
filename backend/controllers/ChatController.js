@@ -149,7 +149,6 @@ const getChatDetails = async (req, res) => {
     }
 
     res.status(200).json(result.rows[0]);
-    console.log("Chat Details:", result.rows[0]);
   } catch (err) {
     console.error('Error fetching chat details:', err.message);
     res.status(500).send('Server Error');
@@ -192,7 +191,5 @@ const sendMedia = async (req, res) => {
     res.status(500).json({ message: "Server Error" });
   }
 };
-
-
 
 module.exports = { getChats, getMessages, sendMessage, startChat, getChatDetails, sendMedia };
