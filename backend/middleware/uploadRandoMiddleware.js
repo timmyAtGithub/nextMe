@@ -12,7 +12,7 @@ const storage = multer.diskStorage({
 
 const uploadRando = multer({
   storage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+  limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file) {
       const allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];

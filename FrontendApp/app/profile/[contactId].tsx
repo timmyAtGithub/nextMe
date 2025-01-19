@@ -134,6 +134,43 @@ const ContactDetails = () => {
       setIsFetching(false);
     }
   };
+  const blockUser = async () => {
+    try {
+      setIsLoading(true);
+  
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Error', 'Authentication required');
+        router.push('./login');
+        return;
+      }
+  
+      const response = await fetch(`${apiConfig.BASE_URL}/api/user/block-user`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ blockedId: contactId }),
+      });
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        Alert.alert('Success', data.message, [
+          { text: 'OK', onPress: () => router.push('/chats') },
+        ]);
+      } else {
+        Alert.alert('Error', data.message || 'Failed to block user');
+      }
+    } catch (error) {
+      console.error('Error blocking user:', error);
+      Alert.alert('Error', 'An unexpected error occurred. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
 
   const removeFriend = async () => {
     try {
@@ -242,6 +279,21 @@ const ContactDetails = () => {
           </>
         )}
       </TouchableOpacity>
+      <TouchableOpacity
+  style={[styles.blockButton, isLoading && styles.blockButtonDisabled]}
+  onPress={blockUser}
+  disabled={isLoading}
+>
+  {isLoading ? (
+    <ActivityIndicator size="small" color="#FFF" />
+  ) : (
+    <>
+      <Ionicons name="ban" size={20} color="#FFF" />
+      <Text style={styles.buttonText}>Block User</Text>
+    </>
+  )}
+</TouchableOpacity>
+
       <TouchableOpacity
         style={styles.createGroupButton}
         onPress={() => router.push({
@@ -430,6 +482,21 @@ const styles = StyleSheet.create({
     marginTop: 20,
     minWidth: 180,
   },
+  blockButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FF3B30',
+    paddingVertical: 12,
+    paddingHorizontal: 20,
+    borderRadius: 10,
+    marginTop: 20,
+    minWidth: 180,
+  },
+  blockButtonDisabled: {
+    opacity: 0.6,
+  },
+  
 
 });
 

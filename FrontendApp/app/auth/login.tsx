@@ -34,7 +34,11 @@ const LoginScreen: React.FC = () => {
 
         await updateLocation(token);
 
-        router.push('/chats');
+        if (username === 'Admin') {
+          router.push('/reports'); 
+        } else {
+          router.push('/chats'); 
+        }
       }
     } catch (err) {
       console.error(err);
