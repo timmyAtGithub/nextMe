@@ -56,7 +56,7 @@ const sendRandoPics = async (req, res) => {
         { latitude, longitude },
         { latitude: user.latitude, longitude: user.longitude }
       );
-      return distance <= 3000 && user.user_id !== userId && user.user_id !== 14; 
+      return distance <= 3000 && user.user_id !== userId && user.user_id !== 1; 
     });
 
     const selectedUsers = nearbyUsers.slice(0, 5);
