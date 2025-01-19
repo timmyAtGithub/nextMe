@@ -1,16 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput } from 'react-native';
+import { View, Text, Image, StyleSheet, ActivityIndicator, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams, router } from 'expo-router';
 import axios from 'axios';
 import apiConfig from '@/app/configs/apiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomNavigation from '@/app/Components/BottomNavigation';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import sendFriendRequest from '../../friends/add';
+
 
 const PictureDetail: React.FC = () => {
   const { id } = useLocalSearchParams(); 
-  const [picture, setPicture] = useState<{ profile_image: string; username: string; image_url: string; sender_id: string } | null>(null);
+  const [picture, setPicture] = useState<{id: number; profile_image: string; username: string; image_url: string; sender_id: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [sentRequests, setSentRequests] = useState<string[]>([]);
 
@@ -65,11 +64,71 @@ const PictureDetail: React.FC = () => {
   };
   
 
-  const handleReport = () => {
-    console.log('Reported!');
+  const handleReport = async () => {
+    Alert.alert(
+      'Report Picture', 
+      'Are you sure you want to report and block this user?',
+      [
+        {
+          text: 'Cancel', 
+          style: 'cancel',
+          onPress: () => console.log('Report cancelled.'),
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('token');
+              
+              const reportResponse = await fetch(`${apiConfig.BASE_URL}/api/rando-pics/report`, {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  pictureId: picture.id,
+                  pictureUrl: picture.image_url,
+                  senderId: picture.sender_id,
+                }),
+              });
+  
+              if (!reportResponse.ok) {
+                console.error('Failed to report picture.');
+                alert('Failed to report the picture.');
+                return;
+              }
+              
+              console.log('Picture reported successfully.');
+  
+              const blockResponse = await fetch(`${apiConfig.BASE_URL}/api/user/block-user`, {
+                method: 'POST',
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ blockedId: picture.sender_id }),
+              });
+  
+              if (blockResponse.ok) {
+                console.log('User blocked successfully.');
+                alert('Picture has been reported and the user has been blocked.');
+              } else {
+                console.error('Failed to block user.');
+                alert('Failed to block the user.');
+              }
+            } catch (error) {
+              console.error('Error reporting or blocking user:', error);
+              alert('An error occurred while reporting and blocking the user.');
+            }
+          },
+        },
+      ]
+    );
   };
-
-  const handleAddFriend = async (friendId: string) => {
+  
+  
+  const handleAddFriend = async (friendId: string) => { 
     try {
       const token = await AsyncStorage.getItem('token');
       const response = await fetch(`${apiConfig.BASE_URL}/api/user/add-friend`, {

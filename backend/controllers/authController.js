@@ -1,5 +1,6 @@
 const pool = require('../db');
 const argon2 = require('argon2');
+const jwt = require('jsonwebtoken');
 
 const registerUser = async (req, res) => {
   const { firstName, lastName, username, number, password } = req.body;
@@ -29,8 +30,6 @@ const registerUser = async (req, res) => {
   }
 };
 
-const jwt = require('jsonwebtoken');
-
 const loginUser = async (req, res) => {
   const { username, password } = req.body;
 
@@ -48,7 +47,7 @@ const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Invalid username or password' });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({  id: user.id, username: username }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
     res.status(200).json({ message: 'Login successful', token });
   } catch (err) {

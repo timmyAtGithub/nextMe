@@ -1,5 +1,5 @@
 const express = require('express');
-const {getUserById,getFriendIdFromChat ,isFriend ,removeFriend ,getContactDetails, uploadProfileImage ,getUserDetails, updateProfile, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests } = require('../controllers/userController');
+const { blockUser, getUserById,getFriendIdFromChat ,isFriend ,removeFriend ,getContactDetails, uploadProfileImage ,getUserDetails, updateProfile, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests } = require('../controllers/userController');
 const { authenticateToken } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');;
 const router = express.Router();
@@ -18,5 +18,6 @@ router.delete('/remove-friend/:contactId', authenticateToken, removeFriend);
 router.get('/is-friend/:chatId', authenticateToken, isFriend);
 router.get('/getFriendIdFromChat/:chatId', authenticateToken, getFriendIdFromChat);
 router.get('/:id', authenticateToken, getUserById);
+router.post('/block-user', authenticateToken, blockUser);
 
 module.exports = router;

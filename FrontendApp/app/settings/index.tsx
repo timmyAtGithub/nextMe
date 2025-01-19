@@ -1,9 +1,32 @@
 import React from 'react';
-import { StyleSheet, View, Button, ScrollView, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Button, ScrollView, Text, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SettingsScreen = () => {
   const router = useRouter();
+
+  const handleLogout = async () => {
+    Alert.alert(
+      'Abmelden',
+      'Sind Sie sicher, dass Sie sich abmelden möchten?',
+      [
+        { text: 'Abbrechen', style: 'cancel' },
+        {
+          text: 'Abmelden',
+          onPress: async () => {
+            try {
+              await AsyncStorage.removeItem('token'); 
+              router.push('/auth/login'); 
+            } catch (error) {
+              console.error('Fehler beim Abmelden:', error);
+              Alert.alert('Fehler', 'Beim Abmelden ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.');
+            }
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -28,7 +51,7 @@ const SettingsScreen = () => {
       <TouchableOpacity style={styles.buttonContainer} onPress={() => router.push('./settings/background')}>
         <Text style={styles.buttonText}>Change Background</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.buttonContainer} onPress={() => {}}>
+      <TouchableOpacity style={styles.buttonContainer} onPress={handleLogout}>
         <Text style={styles.buttonText}>Abmelden</Text>
       </TouchableOpacity>
     </ScrollView>

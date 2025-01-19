@@ -382,8 +382,43 @@ const getUserById = async (req, res) => {
     res.status(500).json({ message: 'Server Error', error: err.message });
   }
 };
+const blockUser = async (req, res) => {
+  const userId = req.user ? req.user.id : null;
+  const { blockedId } = req.body; 
 
-module.exports = { getUserById, getFriendIdFromChat, isFriend, removeFriend, getContactDetails, uploadProfileImage, updateProfile, getUserDetails, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests };
+  console.log('blockUser endpoint:', { userId, blockedId });
+
+  if (!userId) {
+    console.error('User ID is missing');
+    return res.status(400).json({ message: 'User ID is missing in the request.' });
+  }
+
+  if (!blockedId) {
+    console.error('Blocked ID is missing');
+    return res.status(400).json({ message: 'Blocked ID is missing in the request.' });
+  }
+
+  try {
+    await pool.query(
+      'DELETE FROM friends WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)',
+      [userId, blockedId]
+    );
+    await pool.query(
+      'INSERT INTO blocks (user_id, blocked_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+      [userId, blockedId]
+    );
+
+    console.log('User successfully blocked:', { userId, blockedId });
+    res.status(200).json({ message: 'User blocked successfully.' });
+  } catch (error) {
+    console.error('Error blocking user:', error);
+    res.status(500).json({ message: 'Internal Server Error' });
+  }
+};
+
+
+
+module.exports = { blockUser, getUserById, getFriendIdFromChat, isFriend, removeFriend, getContactDetails, uploadProfileImage, updateProfile, getUserDetails, getFriends, sendFriendRequest, getFriendRequests, respondToFriendRequest, searchUsers, getSentFriendRequests };
 
 
 
