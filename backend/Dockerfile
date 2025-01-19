@@ -10,6 +10,11 @@ RUN npm install -g ngrok
 
 COPY . .
 
+COPY .env .env
+
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
 EXPOSE 5000
 
-CMD ["sh", "-c", "node server.js & ngrok http 5000 --authtoken=2rqC7ZFqdCsNBgzKSRAaFuBIiH4_3jUrv1hwZJzzyb8g8MWWX --region=eu --url=lucky-forcibly-stingray.ngrok-free.app" ]
+CMD ["/start.sh"]
