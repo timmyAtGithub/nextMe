@@ -146,6 +146,15 @@ const sendFriendRequest = async (req, res) => {
   const { receiverId } = req.body;
 
   try {
+    const existingFriendship = await pool.query(
+      'SELECT * FROM friends WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1)',
+      [senderId, receiverId]
+    );
+
+    if (existingFriendship.rows.length > 0) {
+      return res.status(400).json({ message: 'You are already friends' });
+    }
+
     const existingRequest = await pool.query(
       'SELECT * FROM friend_requests WHERE sender_id = $1 AND receiver_id = $2 AND status = $3',
       [senderId, receiverId, 'pending']
@@ -166,6 +175,8 @@ const sendFriendRequest = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
+
 const getFriendRequests = async (req, res) => {
   const userId = req.user.id;
 
@@ -184,6 +195,7 @@ const getFriendRequests = async (req, res) => {
     res.status(500).send('Server Error');
   }
 };
+
 const respondToFriendRequest = async (req, res) => {
   const userId = req.user.id;
   const { requestId, action } = req.body;

@@ -62,17 +62,6 @@ export default function Camera() {
     }
   };
 
-  const handleSavePhoto = async () => {
-    if (photo) {
-      try {
-        await MediaLibrary.saveToLibraryAsync(photo.uri);
-        Alert.alert('Photo Saved', 'Your photo has been saved to the gallery!');
-      } catch (error) {
-        Alert.alert('Save Failed', 'Failed to save the photo to the gallery.');
-      }
-    }
-  };
-
   const handleRetakePhoto = () => setPhoto(null);
 
   if (photo) {
@@ -81,7 +70,6 @@ export default function Camera() {
         <PhotoPreviewSection
           photo={photo}
           handleRetakePhoto={handleRetakePhoto}
-          handleSavePhoto={handleSavePhoto}
         />
       </GestureHandlerRootView>
     );

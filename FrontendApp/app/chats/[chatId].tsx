@@ -6,7 +6,6 @@ import GlobalStyles from '../styles/globalStyles';
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import apiConfig from '../configs/apiConfig';
-import { ImageManipulator } from 'expo-image-manipulator';
 
 const Chat = () => {
   const router = useRouter();
@@ -36,6 +35,7 @@ const Chat = () => {
   interface ChatDetails {
     friend_username: string;
     friend_id: number;
+    friend_profile_image: string;
   }
 
   const [messages, setMessages] = useState<Message[]>([]);

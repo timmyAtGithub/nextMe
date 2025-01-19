@@ -59,7 +59,7 @@ const GroupCreation = () => {
       const token = await AsyncStorage.getItem("token");
       if (!token) {
         Alert.alert("Error", "You must be logged in.");
-        router.push("/login");
+        router.push("./login");
         return;
       }
 
@@ -353,7 +353,7 @@ const GroupCreation = () => {
             <Image
               source={
                 item.profile_image
-                  ? { uri: item.profile_image }
+                  ? { uri: `${apiConfig.BASE_URL}${item.profile_image}` }
                   : require("../assets/default-profile.png")
               }
               style={styles.profileImage}

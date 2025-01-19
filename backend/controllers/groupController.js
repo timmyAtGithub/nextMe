@@ -247,7 +247,7 @@ const getUserGroups = async (req, res) => {
             [userId]
         );
 
-        console.log("Fetched groups with last messages:", result.rows);
+       
         res.status(200).json(result.rows);
     } catch (error) {
         console.error("Error fetching user groups:", error);

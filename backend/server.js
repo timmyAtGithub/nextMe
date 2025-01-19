@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const os = require('os');
 
+
 dotenv.config();
 
 const app = express();
@@ -21,6 +22,12 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 console.log('Datenbankverbindung erfolgreich');
+
+const randoPicsRoutes = require("./routes/randoPicsRoutes");
+app.use("/api/rando-pics", randoPicsRoutes);
+
+const locationRoutes = require("./routes/locationRoutes");
+app.use("/api/location", locationRoutes);
 
 const authRoutes = require('./routes/authRoutes');
 app.use('/api/auth', authRoutes);

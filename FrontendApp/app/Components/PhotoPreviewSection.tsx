@@ -1,129 +1,34 @@
 import React, { useState, useRef } from 'react';
-import {
-  TouchableOpacity, Image, StyleSheet, View, Text, TextInput, Dimensions, Platform, KeyboardAvoidingView, Keyboard, TouchableWithoutFeedback, PanResponder,
-} from 'react-native';
+import { TouchableOpacity,Image,StyleSheet,View,Text,Dimensions,KeyboardAvoidingView,Keyboard,TouchableWithoutFeedback,PanResponder, Platform, } from 'react-native';
 import { AntDesign, MaterialIcons } from '@expo/vector-icons';
-import Animated, { useSharedValue, useAnimatedStyle, } from 'react-native-reanimated';
-import { GestureHandlerRootView, Gesture, GestureDetector, } from 'react-native-gesture-handler';
-import { captureRef } from 'react-native-view-shot';
 import Svg, { Path } from 'react-native-svg';
 import * as MediaLibrary from 'expo-media-library';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { captureRef } from 'react-native-view-shot';
+import DraggableScalableText from './DraggableScalableText';
+import { randoPics } from './RandoPics';
 
 const { width, height } = Dimensions.get('window');
 
-const FONTS_WITH_BORDER = ['Arial', 'Courier', 'Times', 'Verdana'];
-
-interface PathDefinition {
+type PathDefinition = {
   points: { x: number; y: number }[];
   color: string;
   width: number;
-}
-
-const DraggableScalableText = ({
-  text,
-  fontFamily,
-  onUpdateText,
-  isEditing,
-  setIsEditing,
-  initialX,
-  initialY,
-}: {
-  text: string;
-  fontFamily: string;
-  onUpdateText: (text: string) => void;
-  isEditing: boolean;
-  setIsEditing: (isEditing: boolean) => void;
-  initialX: number;
-  initialY: number;
-}) => {
-  const translateX = useSharedValue(initialX);
-  const translateY = useSharedValue(initialY);;
-  const rotation = useSharedValue(0);
-
-  const hasBorder = FONTS_WITH_BORDER.includes(fontFamily);
-
-  const panGesture = Gesture.Pan()
-    .onUpdate((event) => {
-      translateX.value = hasBorder ? 0 : event.translationX;
-      translateY.value = event.translationY;
-    })
-    .onEnd(() => {
-      if (hasBorder) {
-        translateX.value = 0;
-      }
-    });
-
-  const pinchGesture = Gesture.Pinch().onUpdate((event) => {
-    if (!hasBorder) {
-      rotation.value = event.rotation;
-    }
-  });
-
-  const composedGesture = Gesture.Simultaneous(panGesture, pinchGesture);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [
-      { translateX: translateX.value },
-      { translateY: translateY.value },
-      { rotateZ: `${rotation.value}rad` },
-    ],
-  }));
-
-  return (
-    <GestureDetector gesture={composedGesture}>
-      <Animated.View
-        style={[
-          styles.draggableText,
-          animatedStyle,
-          hasBorder && styles.textWithBorder,
-        ]}
-      >
-        <TouchableOpacity activeOpacity={1} onPress={() => setIsEditing(true)}>
-          <View style={styles.textBoxFullWidth}>
-            {isEditing ? (
-              <TextInput
-                style={[
-                  styles.textElement,
-                  {
-                    fontFamily,
-                    maxWidth: width - 20,
-                  },
-                ]}
-                autoFocus
-                value={text}
-                onChangeText={onUpdateText}
-                onBlur={() => setIsEditing(false)}
-                multiline
-                scrollEnabled={false}
-              />
-            ) : (
-              <Text
-                style={[
-                  styles.textElement,
-                  {
-                    fontFamily,
-                    maxWidth: width - 20,
-                  },
-                ]}
-              >
-                {text || 'Tap to add text'}
-              </Text>
-            )}
-          </View>
-        </TouchableOpacity>
-      </Animated.View>
-    </GestureDetector>
-  );
 };
 
-const PhotoPreviewSection = ({ photo, handleRetakePhoto }) => {
+type Photo = {
+  base64?: string;
+  uri: string;
+};
+
+const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handleRetakePhoto: () => void }) => {
   const [mode, setMode] = useState<'text' | 'draw' | null>(null);
   const [paths, setPaths] = useState<PathDefinition[]>([]);
   const [currentPath, setCurrentPath] = useState<PathDefinition | null>(null);
   const [selectedColor, setSelectedColor] = useState('red');
   const [selectedFont, setSelectedFont] = useState('System');
   const [textElements, setTextElements] = useState<
-    { id: string; text: string; fontFamily: string; isEditing: boolean }[]
+    { id: string; text: string; fontFamily: string; isEditing: boolean; initialX: number; initialY: number }[]
   >([]);
 
   const colors = [
@@ -192,13 +97,13 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }) => {
   };
 
 
-  const handleUpdateText = (id, newText) => {
+  const handleUpdateText = (id: string, newText: string) => {
     setTextElements((prev) =>
       prev.map((elem) => (elem.id === id ? { ...elem, text: newText } : elem))
     );
   };
 
-  const handleChangeFont = (id, newFont) => {
+  const handleChangeFont = (id: string, newFont: string) => {
     setTextElements((prev) =>
       prev.map((elem) =>
         elem.id === id
@@ -211,27 +116,40 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }) => {
     );
   };
 
-  const handleSavePhoto = async () => {
+  const handleSendPhoto = async () => {
     try {
+      console.log('Start handleSendPhoto');
+
       const { status } = await MediaLibrary.requestPermissionsAsync();
       if (status !== 'granted') {
         alert('Permission to access camera roll is required!');
         return;
       }
 
-      const uri = await captureRef(imageContainerRef, {
+      console.log('Permissions granted');
+
+      const localUri = await captureRef(imageContainerRef, {
         format: 'png',
         quality: 1,
         result: 'tmpfile',
       });
 
+      console.log('Image captured:', localUri);
 
-      if (uri) {
-        const asset = await MediaLibrary.createAssetAsync(uri);
-        alert('Bild gespeichert in deiner Galerie!\n' + asset.uri);
+      if (localUri) {
+        const asset = await MediaLibrary.createAssetAsync(localUri);
+        console.log('Image saved to gallery:', asset.uri);
+        const imageFile = {
+          uri: localUri,
+          type: 'image/png',
+          name: `photo-${Date.now()}.png`
+        };
+
+        await randoPics(imageFile);
+        console.log('LocationHandler completed');
       }
     } catch (error) {
-      console.error('Error saving photo', error);
+      console.error('Error in handleSendPhoto:', error);
     }
   };
 
@@ -354,7 +272,7 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }) => {
           )}
 
           <View>
-            <TouchableOpacity style={styles.sendButton} onPress={handleSavePhoto}>
+            <TouchableOpacity style={styles.sendButton} onPress={handleSendPhoto}>
               <Text style={styles.sendButtonText}>Send</Text>
             </TouchableOpacity>
           </View>

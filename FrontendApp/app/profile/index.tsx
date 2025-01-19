@@ -15,7 +15,7 @@ const Profile: React.FC = () => {
   const router = useRouter();
   const [userData, setUserData] = useState<{
     username: string;
-    profileImage: string;
+    profile_image: string;
     about: string;
   } | null>(null);
   const [editing, setEditing] = useState<{ field: string; value: string | null }>({
