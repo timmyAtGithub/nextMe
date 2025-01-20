@@ -6,8 +6,10 @@ import { useRouter } from 'expo-router';
 import Header from '../Components/Header';
 import BottomNavigation from '../Components/BottomNavigation';
 import apiConfig from '../configs/apiConfig';
+import { useTheme } from '../settings/themeContext';
 
 const Friends: React.FC = () => {
+   const { GlobalStyles } = useTheme();
   const [friends, setFriends] = useState<any[]>([]);
   const [friendRequests, setFriendRequests] = useState<{ id: string | number; profile_image: string; sender_name: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,22 +94,22 @@ const Friends: React.FC = () => {
   };
 
   const renderFriendRequest = ({ item }: { item: { id: string | number; profile_image: string; sender_name: string } }) => (
-    <View style={styles.requestItem}>
-      <Image source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} style={styles.profileImage} />
-      <Text style={styles.name}>{item.sender_name}</Text>
+    <View style={GlobalStyles.requestItem}>
+      <Image source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} style={GlobalStyles.profileImage} />
+      <Text style={GlobalStyles.name}>{item.sender_name}</Text>
       <TouchableOpacity onPress={() => respondToRequest(item.id, 'accepted')}>
-        <Text style={styles.accept}>✔</Text>
+        <Text style={GlobalStyles.accept}>✔</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => respondToRequest(item.id, 'rejected')}>
-        <Text style={styles.reject}>✖</Text>
+        <Text style={GlobalStyles.reject}>✖</Text>
       </TouchableOpacity>
     </View>
   );
 
   const renderFriend = ({ item }: { item: { id: string | number; profile_image: string; name: string } }) => (
-    <View style={styles.friendItem}>
-      <Image source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} style={styles.profileImage} />
-      <Text style={styles.name}>{item.name}</Text>
+    <View style={GlobalStyles.friendItem}>
+      <Image source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} style={GlobalStyles.profileImage} />
+      <Text style={GlobalStyles.name}>{item.name}</Text>
       <TouchableOpacity onPress={() => openOrCreateChat(item.id)}>
         <Ionicons name="chatbubbles-outline" size={24} color="#FFF" />
       </TouchableOpacity>
@@ -122,112 +124,46 @@ const Friends: React.FC = () => {
 
 
   return (
-    <View style={styles.container}>
-      <Header />
-      <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchBar}
-          placeholder="Search"
-          placeholderTextColor="#AAA"
-          value={searchQuery}
-          onChangeText={setSearchQuery}
-        />
-        <TouchableOpacity style={styles.addButton} onPress={() => router.push('/friends/add')}>
-          <Ionicons name="add-circle-outline" size={30} color="#FFF" />
-        </TouchableOpacity>
+      <View style={GlobalStyles.container}>
+        <Header />
+    
+        <View style={[GlobalStyles.friendsContainer, { marginTop: 60 }]}>
+        <View style={GlobalStyles.searchContainer}>
+  <TextInput
+    style={GlobalStyles.searchBar}
+    placeholder="Search"
+    placeholderTextColor="#AAA"
+    value={searchQuery}
+    onChangeText={setSearchQuery}
+  />
+  <TouchableOpacity style={GlobalStyles.addButton} onPress={() => router.push('/friends/add')}>
+    <Ionicons name="add-circle-outline" size={30} color="#FFF" />
+  </TouchableOpacity>
+</View>
+
+
+    
+          <Text style={GlobalStyles.sectionHeader}>Friend Requests</Text>
+          <FlatList
+            data={friendRequests}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderFriendRequest}
+            contentContainerStyle={GlobalStyles.listContainer}
+            ListEmptyComponent={<Text style={GlobalStyles.emptyMessage}>No pending friend requests</Text>}
+          />
+          <Text style={GlobalStyles.sectionHeader}>Friends</Text>
+          <FlatList
+            data={filteredFriends}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={renderFriend}
+            contentContainerStyle={GlobalStyles.listContainer}
+            ListEmptyComponent={<Text style={GlobalStyles.emptyMessage}>No friends found</Text>}
+          />
+        </View>
+    
+        <BottomNavigation />
       </View>
-
-      <Text style={styles.sectionHeader}>Friend Requests</Text>
-      <FlatList
-        data={friendRequests}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderFriendRequest}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={<Text style={styles.emptyMessage}>No pending friend requests</Text>}
-      />
-      <Text style={styles.sectionHeader}>Friends</Text>
-      <FlatList
-        data={filteredFriends}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderFriend}
-        contentContainerStyle={styles.listContainer}
-        ListEmptyComponent={<Text style={styles.emptyMessage}>No friends found</Text>}
-      />
-      <BottomNavigation />
-    </View>
-  );
+    );
+    
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#1E1E1E',
-    padding: 10,
-  },
-  searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  searchBar: {
-    flex: 1,
-    backgroundColor: '#333',
-    color: '#FFF',
-    borderRadius: 10,
-    padding: 10,
-  },
-  addButton: {
-    marginLeft: 10,
-  },
-  listContainer: {
-    paddingBottom: 20,
-  },
-  sectionHeader: {
-    fontSize: 18,
-    color: '#FFF',
-    marginVertical: 10,
-  },
-  emptyMessage: {
-    color: '#AAA',
-    textAlign: 'center',
-    marginTop: 10,
-  },
-  requestItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: '#292929',
-    borderRadius: 10,
-  },
-  friendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    marginVertical: 5,
-    backgroundColor: '#292929',
-    borderRadius: 10,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  name: {
-    color: '#FFF',
-    fontSize: 16,
-    flex: 1,
-  },
-  accept: {
-    color: 'green',
-    fontSize: 20,
-    marginRight: 10,
-  },
-  reject: {
-    color: 'red',
-    fontSize: 20,
-  },
-});
-
 export default Friends;

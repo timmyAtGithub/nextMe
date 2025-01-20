@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Image, TextInput, TouchableOpacity, Button, Alert } from 'react-native';
+import { View, Text, Image, TextInput, TouchableOpacity, Button, Alert, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import styles from '../styles/profileStyles';
 import apiConfig from '../configs/apiConfig';
-import * as FileSystem from 'expo-file-system';
 import * as ImageManipulator from 'expo-image-manipulator';
+import { useTheme } from '../settings/themeContext';
+
+
+
 
 const Profile: React.FC = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
   const [userData, setUserData] = useState<{
     username: string;
@@ -53,10 +56,27 @@ const Profile: React.FC = () => {
     fetchUserData();
   }, []);
 
+  const resizeImage = async (uri: string): Promise<string> => {
+    try {
+      const result = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 800 } }],
+        {
+          compress: 0.8,
+          format: ImageManipulator.SaveFormat.JPEG,
+        }
+      );
+      return result.uri;
+    } catch (error) {
+      console.error('Error resizing image:', error);
+      throw error;
+    }
+  };
+
   const uploadImage = async (uri: string): Promise<boolean> => {
     try {
       setIsUploading(true);
-      
+
       const token = await AsyncStorage.getItem('token');
       if (!token) {
         Alert.alert('Error', 'Authentication token not found');
@@ -88,7 +108,7 @@ const Profile: React.FC = () => {
       }
 
       const data = await uploadResponse.json();
-      await fetchUserData(); 
+      await fetchUserData();
       return true;
     } catch (error) {
       console.error('Upload error:', error);
@@ -98,27 +118,10 @@ const Profile: React.FC = () => {
     }
   };
 
-  const resizeImage = async (uri: string): Promise<string> => {
-    try {
-      const result = await ImageManipulator.manipulateAsync(
-        uri,
-        [{ resize: { width: 800 } }],
-        { 
-          compress: 0.8, 
-          format: ImageManipulator.SaveFormat.JPEG 
-        }
-      );
-      return result.uri;
-    } catch (error) {
-      console.error('Error resizing image:', error);
-      throw error;
-    }
-  };
-
   const pickImage = async () => {
     try {
       const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
-      
+
       if (!permissionResult.granted) {
         Alert.alert('Permission needed', 'Please grant permission to access your photos');
         return;
@@ -135,7 +138,7 @@ const Profile: React.FC = () => {
         try {
           const resizedUri = await resizeImage(result.assets[0].uri);
           const uploadSuccess = await uploadImage(resizedUri);
-          
+
           if (uploadSuccess) {
             Alert.alert('Success', 'Profile image updated successfully');
           }
@@ -174,7 +177,6 @@ const Profile: React.FC = () => {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
-      const data = await response.json();
       Alert.alert('Success', `${field} updated successfully`);
       setEditing({ field: '', value: null });
       await fetchUserData();
@@ -186,73 +188,72 @@ const Profile: React.FC = () => {
 
   if (!userData) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
+      <View style={GlobalStyles.container}>
+        <ActivityIndicator size="large" color="#FFF" />
+        <Text style={GlobalStyles.label}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        style={styles.backButton}
-        onPress={() => router.push('/chats')}
-      >
+    <View style={GlobalStyles.container}>
+      <TouchableOpacity style={GlobalStyles.backButton} onPress={() => router.push('/chats')}>
         <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
       </TouchableOpacity>
-
-      <TouchableOpacity 
-        onPress={pickImage}
-        disabled={isUploading}
-      >
-        <Image 
-          source={{ 
-            uri: userData.profile_image.startsWith('http') 
-              ? userData.profile_image 
-              : `${apiConfig.BASE_URL}${userData.profile_image}` 
-          }} 
-          style={styles.profileImage} 
+      <View style={GlobalStyles.profileSection}>
+        <TouchableOpacity onPress={pickImage} disabled={isUploading}>
+          <Image
+            source={{
+              uri: userData.profile_image.startsWith('http')
+                ? userData.profile_image
+                : `${apiConfig.BASE_URL}${userData.profile_image}`,
+            }}
+            style={GlobalStyles.profileImageProfiles}
+          />
+        </TouchableOpacity>
+        <Button
+          title={isUploading ? 'Uploading...' : 'Edit Image'}
+          onPress={pickImage}
+          disabled={isUploading}
         />
-      </TouchableOpacity>
-      
-      <Button 
-        title={isUploading ? "Uploading..." : "Edit Image"} 
-        onPress={pickImage}
-        disabled={isUploading}
-      />
 
-      {editing.field === 'username' ? (
-        <View>
+        {editing.field === 'username' ? (
           <TextInput
-            style={styles.input}
+            style={GlobalStyles.input}
             value={editing.value || ''}
             onChangeText={(text) => setEditing({ field: 'username', value: text })}
           />
-          <Button title="Save" onPress={() => handleSave('username', editing.value || '')} />
-        </View>
-      ) : (
-        <View>
-          <Text style={styles.label}>{userData.username}</Text>
-          <Button title="Edit" onPress={() => handleEdit('username')} />
-        </View>
-      )}
+        ) : (
+          <Text style={GlobalStyles.label}>{userData.username}</Text>
+        )}
+        <Button
+          title={editing.field === 'username' ? 'Save' : 'Edit'}
+          onPress={() =>
+            editing.field === 'username'
+              ? handleSave('username', editing.value || '')
+              : handleEdit('username')
+          }
+        />
 
-      {editing.field === 'about' ? (
-        <View>
+        {editing.field === 'about' ? (
           <TextInput
-            style={styles.input}
+            style={GlobalStyles.input}
             value={editing.value || ''}
             onChangeText={(text) => setEditing({ field: 'about', value: text })}
             multiline
           />
-          <Button title="Save" onPress={() => handleSave('about', editing.value || '')} />
-        </View>
-      ) : (
-        <View>
-          <Text style={styles.label}>{userData.about}</Text>
-          <Button title="Edit" onPress={() => handleEdit('about')} />
-        </View>
-      )}
+        ) : (
+          <Text style={GlobalStyles.label}>{userData.about}</Text>
+        )}
+        <Button
+          title={editing.field === 'about' ? 'Save' : 'Edit'}
+          onPress={() =>
+            editing.field === 'about'
+              ? handleSave('about', editing.value || '')
+              : handleEdit('about')
+          }
+        />
+      </View>
     </View>
   );
 };

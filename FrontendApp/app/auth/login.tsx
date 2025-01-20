@@ -4,10 +4,12 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import styles from '../styles/LoginScreenStyles';
 import apiConfig from '../configs/apiConfig';
+import { useTheme } from '../settings/themeContext';
+
 
 const LoginScreen: React.FC = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
 
   const [username, setUsername] = useState('');
@@ -80,18 +82,18 @@ const LoginScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login</Text>
+    <View style={GlobalStyles.container}>
+      <Text style={GlobalStyles.title}>Login</Text>
       {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Password"
         secureTextEntry
         value={password}
@@ -100,8 +102,8 @@ const LoginScreen: React.FC = () => {
       <Button title="Login" onPress={handleLogin} />
 
       <TouchableOpacity onPress={handleRegister}>
-        <Text style={styles.registerText}>
-          Not registered yet? <Text style={styles.registerLink}>Register now</Text>
+        <Text style={GlobalStyles.authText}>
+          Not registered yet? <Text style={GlobalStyles.authLink}>Register now</Text>
         </Text>
       </TouchableOpacity>
     </View>

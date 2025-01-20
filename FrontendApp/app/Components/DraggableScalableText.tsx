@@ -2,13 +2,18 @@ import React from 'react';
 import { TouchableOpacity, Text, TextInput, View, StyleSheet, Dimensions } from 'react-native';
 import Animated, { useSharedValue, useAnimatedStyle } from 'react-native-reanimated';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
+import { useTheme } from '../settings/themeContext';
 
 
 const { width } = Dimensions.get('window');
 
+
+
 const FONTS_WITH_BORDER = ['Arial', 'Courier', 'Times', 'Verdana'];
 
-const DraggableScalableText = ({
+const DraggableScalableText = (
+  
+  {
   text,
   fontFamily,
   onUpdateText,
@@ -25,6 +30,7 @@ const DraggableScalableText = ({
   initialX: number;
   initialY: number;
 }) => {
+  const { GlobalStyles } = useTheme();
   const translateX = useSharedValue(initialX);
   const translateY = useSharedValue(initialY);
   const rotation = useSharedValue(0);
@@ -62,17 +68,17 @@ const DraggableScalableText = ({
     <GestureDetector gesture={composedGesture}>
       <Animated.View
         style={[
-          styles.draggableText,
+          GlobalStyles.draggableText,
           animatedStyle,
-          hasBorder && styles.textWithBorder,
+          hasBorder && GlobalStyles.textWithBorder,
         ]}
       >
         <TouchableOpacity activeOpacity={1} onPress={() => setIsEditing(true)}>
-          <View style={styles.textBoxFullWidth}>
+          <View style={GlobalStyles.textBoxFullWidth}>
             {isEditing ? (
               <TextInput
                 style={[
-                  styles.textElement,
+                  GlobalStyles.textElement,
                   {
                     fontFamily,
                     maxWidth: width - 20,
@@ -88,7 +94,7 @@ const DraggableScalableText = ({
             ) : (
               <Text
                 style={[
-                  styles.textElement,
+                  GlobalStyles.textElement,
                   {
                     fontFamily,
                     maxWidth: width - 20,
@@ -104,29 +110,5 @@ const DraggableScalableText = ({
     </GestureDetector>
   );
 };
-
-const styles = StyleSheet.create({
-  draggableText: {
-    position: 'absolute',
-    zIndex: 10,
-  },
-  textElement: {
-    color: 'white',
-    fontSize: 22,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-    padding: 5,
-  },
-  textWithBorder: {
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    width: width,
-  },
-  textBoxFullWidth: {
-    alignSelf: 'center',
-  },
-});
 
 export default DraggableScalableText;

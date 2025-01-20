@@ -6,6 +6,8 @@ import { useRouter } from 'expo-router';
 import apiConfig from '../configs/apiConfig';
 import BottomNavigation from '../Components/BottomNavigation';
 import Header from '../Components/Header';
+import { useTheme } from '../settings/themeContext';
+
 
 interface Picture {
   id: string;
@@ -15,6 +17,8 @@ interface Picture {
 }
 
 const PicturesScreen: React.FC = () => {
+  const { GlobalStyles } = useTheme();
+
   const [pictures, setPictures] = useState<Picture[]>([]);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -41,81 +45,46 @@ const PicturesScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
+      <View style={[GlobalStyles.container, GlobalStyles.loadingContainerPics]}>
+        <Text style={GlobalStyles.text}>Loading...</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
-      {/* Header */}
+    <View style={GlobalStyles.container}>
       <Header />
-      
-      {/* Liste */}
-      <View style={styles.listContainer}>
+      <View style={GlobalStyles.contentContainerPics}>
         <FlatList
           data={pictures}
           keyExtractor={(item) => item.id}
+          contentContainerStyle={GlobalStyles.listContentPics}
           renderItem={({ item }) => (
             <TouchableOpacity
-              style={styles.pictureContainer}
+              style={GlobalStyles.pictureItemPics}
               onPress={() =>
                 router.push({
                   pathname: `./pictures/detail/${item.id}`,
                 })
               }
             >
-              <Image source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} style={styles.profileImage} />
-              <View style={styles.infoContainer}>
-                <Text style={styles.username}>{item.username}</Text>
-                <Text style={styles.time}>{new Date(item.sent_at).toLocaleString()}</Text>
+              <Image 
+                source={{ uri: `${apiConfig.BASE_URL}${item.profile_image}` }} 
+                style={GlobalStyles.profileImage} 
+              />
+              <View style={GlobalStyles.infoContainer}>
+                <Text style={GlobalStyles.username}>{item.username}</Text>
+                <Text style={GlobalStyles.time}>
+                  {new Date(item.sent_at).toLocaleString()}
+                </Text>
               </View>
             </TouchableOpacity>
           )}
         />
       </View>
-
       <BottomNavigation />
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#000',
-  },
-  listContainer: {
-    flex: 1, 
-    marginTop: '16%', 
-    marginBottom: '10%',
-  },
-  pictureContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 20,
-    backgroundColor: '#333',
-    padding: 10,
-    borderRadius: 10,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  infoContainer: {
-    flex: 1,
-  },
-  username: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  time: {
-    color: '#bbb',
-    fontSize: 12,
-  },
-});
-
-export default PicturesScreen;
+export default PicturesScreen;  

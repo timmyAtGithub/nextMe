@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
-import styles from '../styles/RegisterScreenStyles';
 import apiConfig from '../configs/apiConfig';
+import { useTheme } from '../settings/themeContext';
+
 
 
 const RegisterScreen: React.FC = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -41,45 +43,45 @@ const RegisterScreen: React.FC = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Register</Text>
+    <View style={GlobalStyles.container}>
+      <Text style={GlobalStyles.title}>Register</Text>
 
       {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="First Name"
         value={firstName}
         onChangeText={setFirstName}
       />
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Last Name"
         value={lastName}
         onChangeText={setLastName}
       />
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Username"
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Phone Number"
         keyboardType="phone-pad"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
       />
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Password"
         secureTextEntry
         value={password}
         onChangeText={setPassword}
       />
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Confirm Password"
         secureTextEntry
         value={confirmPassword}
@@ -89,8 +91,8 @@ const RegisterScreen: React.FC = () => {
       <Button title="Register" onPress={handleRegister} />
 
       <TouchableOpacity onPress={() => router.push('./login')}>
-        <Text style={styles.loginText}>
-          Already have an account? <Text style={styles.loginLink}>Login</Text>
+        <Text style={GlobalStyles.authText}>
+          Already have an account? <Text style={GlobalStyles.authLink}>Login</Text>
         </Text>
       </TouchableOpacity>
     </View>

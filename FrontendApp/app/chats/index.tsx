@@ -5,6 +5,8 @@ import BottomNavigation from '../Components/BottomNavigation';
 import Header from '../Components/Header';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiConfig from '../configs/apiConfig';
+import { useTheme } from '../settings/themeContext';
+
 
 interface Chat {
   id: number;
@@ -18,6 +20,8 @@ interface Chat {
 }
 
 const ChatsOverview: React.FC = () => {
+  const { GlobalStyles } = useTheme();
+  
   const [chats, setChats] = useState<Chat[]>([]);
   const router = useRouter();
   const [sentRequests, setSentRequests] = useState<number[]>([]);
@@ -193,22 +197,22 @@ const ChatsOverview: React.FC = () => {
 
     return (
       <TouchableOpacity
-        style={styles.chatItem}
+        style={GlobalStyles.chatItem}
         onPress={() => handleChatPress(item)}
       >
         <Image
           source={{ uri: imageUrl }}
-          style={styles.profileImage}
+          style={GlobalStyles.profileImageList}
           onError={(e) => console.error('Image Load Error:', e.nativeEvent.error)}
         />
-        <View style={styles.chatDetails}>
-          <Text style={styles.friendName}>
+        <View style={GlobalStyles.chatDetails}>
+          <Text style={GlobalStyles.friendName}>
             {item.type === 'private' ? item.friend_username : item.group_name}
           </Text>
-          <Text style={styles.lastMessage}>
+          <Text style={GlobalStyles.lastMessage}>
             {item.lastMessage || 'No messages yet'}
             {item.lastMessageTimestamp !== '1970-01-01T00:00:00.000Z' && (
-              <Text style={styles.lastMessageTime}>
+              <Text style={GlobalStyles.lastMessageTime}>
                 {' '}• {new Date(item.lastMessageTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </Text>
             )}
@@ -222,66 +226,22 @@ const ChatsOverview: React.FC = () => {
 
 
   return (
-    <View style={styles.container}>
+    <View style={GlobalStyles.container}>
       <Header />
-      <FlatList
-        data={chats}
-        keyExtractor={(item) => `${item.type}-${item.id}`}
-        renderItem={renderChat}
-        contentContainerStyle={styles.chatList}
-        ListEmptyComponent={<Text style={styles.emptyText}>No chats available</Text>}
-      />
+      <View style={GlobalStyles.chatListContainer}>
+        <FlatList
+          data={chats}
+          keyExtractor={(item) => `${item.type}-${item.id}`}
+          renderItem={renderChat}
+          contentContainerStyle={GlobalStyles.chatList}
+          ListEmptyComponent={<Text style={GlobalStyles.emptyText}>No chats available</Text>}
+        />
+      </View>
       <BottomNavigation />
     </View>
+    
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#121212',
-  },
-  chatList: {
-    flexGrow: 1,
-    padding: 10,
-  },
-  chatItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#1E1E1E',
-    borderRadius: 5,
-    marginBottom: 10,
-  },
-  profileImage: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    marginRight: 10,
-  },
-  chatDetails: {
-    flex: 1,
-  },
-  friendName: {
-    color: '#FFFFFF',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  lastMessage: {
-    color: '#AAAAAA',
-    marginTop: 5,
-    fontSize: 14,
-    flexDirection: 'row',
-  },
-  lastMessageTime: {
-    color: '#888888',
-    fontSize: 12,
-  },
-  emptyText: {
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-});
 
 export default ChatsOverview;

@@ -7,8 +7,12 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { captureRef } from 'react-native-view-shot';
 import DraggableScalableText from './DraggableScalableText';
 import { randoPics } from './RandoPics';
+import { useTheme } from '../settings/themeContext';
+
 
 const { width, height } = Dimensions.get('window');
+
+
 
 type PathDefinition = {
   points: { x: number; y: number }[];
@@ -22,6 +26,7 @@ type Photo = {
 };
 
 const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handleRetakePhoto: () => void }) => {
+  const { GlobalStyles } = useTheme();
   const [mode, setMode] = useState<'text' | 'draw' | null>(null);
   const [paths, setPaths] = useState<PathDefinition[]>([]);
   const [currentPath, setCurrentPath] = useState<PathDefinition | null>(null);
@@ -157,57 +162,57 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handl
     <GestureHandlerRootView style={{ flex: 1 }}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
-          style={styles.container}
+          style={GlobalStyles.container}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={styles.header}>
+          <View style={GlobalStyles.header}>
             <TouchableOpacity onPress={handleRetakePhoto}>
               <AntDesign name="close" size={24} color="white" />
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setSelectedFont('Arial')}
-              style={styles.toolButton}
+              style={GlobalStyles.toolButton}
             >
               <Text style={{ color: 'white' }}>Arial</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setSelectedFont('Courier')}
-              style={styles.toolButton}
+              style={GlobalStyles.toolButton}
             >
               <Text style={{ color: 'white' }}>Courier</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setSelectedFont('Times')}
-              style={styles.toolButton}
+              style={GlobalStyles.toolButton}
             >
               <Text style={{ color: 'white' }}>Times</Text>
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => setSelectedFont('Verdana')}
-              style={styles.toolButton}
+              style={GlobalStyles.toolButton}
             >
               <Text style={{ color: 'white' }}>Verdana</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={handleAddText} style={styles.toolButton}>
+            <TouchableOpacity onPress={handleAddText} style={GlobalStyles.toolButton}>
               <MaterialIcons name="text-fields" size={24} color="white" />
             </TouchableOpacity>
 
             <TouchableOpacity
               onPress={() => setMode(mode === 'draw' ? null : 'draw')}
-              style={styles.toolButton}
+              style={GlobalStyles.toolButton}
             >
               <MaterialIcons name="brush" size={24} color="white" />
             </TouchableOpacity>
           </View>
           <View
-            style={styles.imageContainer}
+            style={GlobalStyles.imageContainer}
             {...drawingPanResponder.panHandlers}
             ref={imageContainerRef}
           >
             <Image
-              style={styles.image}
+              style={GlobalStyles.image}
               source={{
                 uri: photo.base64
                   ? `data:image/jpg;base64,${photo.base64}`
@@ -260,11 +265,11 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handl
 
           </View>
           {mode === 'draw' && (
-            <View style={styles.colorPicker}>
+            <View style={GlobalStyles.colorPicker}>
               {colors.map((color) => (
                 <TouchableOpacity
                   key={color}
-                  style={[styles.colorOption, { backgroundColor: color }]}
+                  style={[GlobalStyles.colorOption, { backgroundColor: color }]}
                   onPress={() => setSelectedColor(color)}
                 />
               ))}
@@ -272,8 +277,8 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handl
           )}
 
           <View>
-            <TouchableOpacity style={styles.sendButton} onPress={handleSendPhoto}>
-              <Text style={styles.sendButtonText}>Send</Text>
+            <TouchableOpacity style={GlobalStyles.sendButton} onPress={handleSendPhoto}>
+              <Text style={GlobalStyles.sendButtonText}>Send</Text>
             </TouchableOpacity>
           </View>
         </KeyboardAvoidingView>
@@ -281,97 +286,4 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handl
     </GestureHandlerRootView>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'black',
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    position: 'absolute',
-    top: 10,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 15,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 10,
-  },
-  toolButton: {
-    padding: 8,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    marginLeft: 5,
-  },
-  imageContainer: {
-    flex: 1,
-    position: 'relative',
-    margin: 0,
-    padding: 0,
-  },
-  image: {
-    width: '100%',
-    height: '100%',
-    aspectRatio: 'auto',
-    resizeMode: 'cover',
-  },
-  colorPicker: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    position: 'absolute',
-    bottom: 80,
-    left: 0,
-    right: 0,
-    paddingHorizontal: 10,
-    zIndex: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-    borderRadius: 10,
-  },
-  colorOption: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    marginHorizontal: 5,
-  },
-  sendButton: {
-    position: 'absolute',
-    bottom: 20,
-    alignSelf: 'center',
-    backgroundColor: 'rgba(52, 152, 219, 0.8)',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 20,
-    zIndex: 10,
-  },
-  sendButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
-  draggableText: {
-    position: 'absolute',
-    zIndex: 10,
-  },
-  textElement: {
-    color: 'white',
-    fontSize: 22,
-    textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.75)',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
-    padding: 5,
-  },
-  textWithBorder: {
-    alignSelf: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    width: width,
-  },
-  textBoxFullWidth: {
-    alignSelf: 'center',
-  },
-});
-
-
 export default PhotoPreviewSection;
