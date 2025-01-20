@@ -5,6 +5,10 @@ import { useRouter, useLocalSearchParams } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as ImageManipulator from "expo-image-manipulator";
 import apiConfig from "../configs/apiConfig";
+import { useTheme } from "../settings/themeContext";
+ 
+
+
 
 interface Friend {
   id: number;
@@ -19,6 +23,7 @@ interface GroupCreateResponse {
 }
 
 const GroupCreation = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
   const { preselectedFriend } = useLocalSearchParams();
 
@@ -294,30 +299,30 @@ const GroupCreation = () => {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={GlobalStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#007AFF" />
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={GlobalStyles.container}>
       <TouchableOpacity
         onPress={pickImage}
-        style={styles.imagePicker}
+        style={GlobalStyles.imagePicker}
         disabled={isUploading}
       >
         {isUploading ? (
           <ActivityIndicator size="small" color="#007AFF" />
         ) : groupImage ? (
-          <Image source={{ uri: groupImage }} style={styles.groupImage} />
+          <Image source={{ uri: groupImage }} style={GlobalStyles.groupImage} />
         ) : (
-          <Text style={styles.imagePlaceholderText}>Upload Group Image</Text>
+          <Text style={GlobalStyles.imagePlaceholderText}>Upload Group Image</Text>
         )}
       </TouchableOpacity>
 
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Group Name"
         placeholderTextColor="#AAA"
         value={groupName}
@@ -326,7 +331,7 @@ const GroupCreation = () => {
       />
 
       <TextInput
-        style={[styles.input, styles.textArea]}
+        style={[GlobalStyles.input, GlobalStyles.textArea]}
         placeholder="Group Description (Optional)"
         placeholderTextColor="#AAA"
         value={groupDescription}
@@ -335,7 +340,7 @@ const GroupCreation = () => {
         maxLength={200}
       />
 
-      <Text style={styles.sectionTitle}>
+      <Text style={GlobalStyles.sectionTitle}>
         Select Friends ({selectedFriends.length} selected)
       </Text>
 
@@ -345,8 +350,8 @@ const GroupCreation = () => {
         renderItem={({ item }) => (
           <TouchableOpacity
             style={[
-              styles.friendItem,
-              selectedFriends.includes(item.id) && styles.friendItemSelected,
+              GlobalStyles.friendItem,
+              selectedFriends.includes(item.id) && GlobalStyles.friendItemSelected,
             ]}
             onPress={() => toggleSelectFriend(item.id)}
           >
@@ -356,24 +361,24 @@ const GroupCreation = () => {
                   ? { uri: `${apiConfig.BASE_URL}${item.profile_image}` }
                   : require("../assets/default-profile.png")
               }
-              style={styles.profileImage}
+              style={GlobalStyles.profileImage}
             />
-            <Text style={styles.friendName}>{item.name || "No Name"}</Text>
+            <Text style={GlobalStyles.friendName}>{item.name || "No Name"}</Text>
           </TouchableOpacity>
         )}
-        contentContainerStyle={styles.friendList}
+        contentContainerStyle={GlobalStyles.friendList}
       />
 
       <TouchableOpacity
         style={[
-          styles.createButton,
+          GlobalStyles.createButton,
           (!groupName.trim() || selectedFriends.length === 0) &&
-          styles.createButtonDisabled,
+          GlobalStyles.createButtonDisabled,
         ]}
         onPress={createGroup}
         disabled={!groupName.trim() || selectedFriends.length === 0 || isLoading}
       >
-        <Text style={styles.buttonText}>
+        <Text style={GlobalStyles.buttonText}>
           {isLoading ? "Creating..." : "Create Group"}
         </Text>
       </TouchableOpacity>
@@ -383,94 +388,3 @@ const GroupCreation = () => {
 
 export default GroupCreation;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#1E1E1E",
-    padding: 16,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#1E1E1E",
-  },
-  imagePicker: {
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#2C2C2E",
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
-    height: 150,
-    overflow: "hidden",
-  },
-  groupImage: {
-    width: "100%",
-    height: "100%",
-    borderRadius: 8,
-  },
-  imagePlaceholderText: {
-    color: "#AAA",
-    fontSize: 16,
-  },
-  input: {
-    backgroundColor: "#2C2C2E",
-    padding: 16,
-    borderRadius: 8,
-    color: "#FFF",
-    marginBottom: 16,
-    fontSize: 16,
-  },
-  textArea: {
-    height: 100,
-    textAlignVertical: "top",
-  },
-  sectionTitle: {
-    color: "#FFF",
-    fontSize: 18,
-    fontWeight: "600",
-    marginVertical: 16,
-  },
-  friendList: {
-    flexGrow: 1,
-  },
-  friendItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: "#2C2C2E",
-    marginBottom: 8,
-  },
-  friendItemSelected: {
-    backgroundColor: "#007AFF",
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginRight: 12,
-    backgroundColor: "#3C3C3E",
-  },
-  friendName: {
-    color: "#FFF",
-    fontSize: 16,
-    flex: 1,
-  },
-  createButton: {
-    backgroundColor: "#007AFF",
-    paddingVertical: 16,
-    alignItems: "center",
-    borderRadius: 8,
-    marginTop: 16,
-  },
-  createButtonDisabled: {
-    backgroundColor: "#4A4A4A",
-  },
-  buttonText: {
-    color: "#FFF",
-    fontSize: 16,
-    fontWeight: "600",
-  },
-});

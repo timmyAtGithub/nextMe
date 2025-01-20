@@ -4,6 +4,12 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import apiConfig from '../configs/apiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { getGlobalStyles } from '../styles/globalStyles';
+import { useColorScheme } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+
+const isDarkMode = useColorScheme() === 'dark';
+const GlobalStyles = getGlobalStyles(isDarkMode);
 
 const ChangePasswordScreen: React.FC = () => {
   const router = useRouter();
@@ -41,13 +47,13 @@ const ChangePasswordScreen: React.FC = () => {
   
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Change Password</Text>
+    <View style={GlobalStyles.container}>
+      <Text style={GlobalStyles.title}>Change Password</Text>
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={GlobalStyles.error}>{error}</Text>}
 
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Current Password"
         secureTextEntry
         value={currentPassword}
@@ -55,7 +61,7 @@ const ChangePasswordScreen: React.FC = () => {
       />
 
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="New Password"
         secureTextEntry
         value={newPassword}
@@ -63,7 +69,7 @@ const ChangePasswordScreen: React.FC = () => {
       />
 
       <TextInput
-        style={styles.input}
+        style={GlobalStyles.input}
         placeholder="Confirm New Password"
         secureTextEntry
         value={confirmPassword}
@@ -72,42 +78,15 @@ const ChangePasswordScreen: React.FC = () => {
 
       <Button title="Change Password" onPress={handleChangePassword} />
 
-      <TouchableOpacity onPress={() => router.push('./settings')}>
-        <Text style={styles.backText}>Back to Settings</Text>
+      <TouchableOpacity
+        style={GlobalStyles.backButton}
+        onPress={() => router.back()}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+       <Ionicons name="arrow-back" size={24} color="#FFF" />
       </TouchableOpacity>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 16,
-    backgroundColor: '#f5f5f5',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-  },
-  input: {
-    height: 40,
-    borderColor: '#ccc',
-    borderWidth: 1,
-    borderRadius: 4,
-    paddingHorizontal: 8,
-    marginBottom: 16,
-    backgroundColor: '#fff',
-  },
-  error: {
-    color: 'red',
-    marginBottom: 16,
-  },
-  backText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: '#007bff',
-  },
-});
 
 export default ChangePasswordScreen;

@@ -2,7 +2,6 @@ import * as Location from 'expo-location';
 import axios from 'axios';
 import apiConfig from '../configs/apiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
 interface ImageFile {
     uri: string;
     type: string;

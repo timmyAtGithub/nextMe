@@ -1,13 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import GlobalStyles from '../styles/globalStyles';
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import apiConfig from '../configs/apiConfig';
+import { useTheme } from '../settings/themeContext';
+
 
 const Chat = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
   const { chatId } = useLocalSearchParams();
   const flatListRef = useRef<FlatList>(null);
@@ -245,7 +247,12 @@ const Chat = () => {
   };
 
   return (
-    <View style={[styles.container, GlobalStyles.background]}>
+    <View style={[GlobalStyles.container, GlobalStyles.background]}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={30} 
+      >
       {chatDetails && (
         <View style={[GlobalStyles.header]}>
           <TouchableOpacity onPress={() => router.push('/chats')}>
@@ -256,7 +263,7 @@ const Chat = () => {
             style={GlobalStyles.profileImage}
           />
           <TouchableOpacity onPress={() => router.push({ pathname: `../profile/${chatDetails.friend_id}` })}>
-            <Text style={GlobalStyles.title}>{chatDetails.friend_username}</Text>
+            <Text style={GlobalStyles.headerText}>{chatDetails.friend_username}</Text>
           </TouchableOpacity>
 
         </View>
@@ -299,36 +306,36 @@ const Chat = () => {
               <Text
                 style={
                   item.sender_id === userId
-                    ? GlobalStyles.Bubbletext
-                    : GlobalStyles.Bubbletext
+                    ? GlobalStyles.bubbleText
+                    : GlobalStyles.bubbleText
                 }
               >
                 {item.text}
               </Text>
+             
             </View>
           );
         }}
-        contentContainerStyle={styles.messageList}
+        contentContainerStyle={GlobalStyles.messageList}
         onContentSizeChange={() => scrollToBottom(false)}
       />
-
       <View style={[GlobalStyles.inputContainer]}>
         <TextInput
-          style={GlobalStyles.input}
+          style={GlobalStyles.inputChat}
           placeholder="Type a message..."
           value={newMessage}
           onChangeText={setNewMessage}
           placeholderTextColor="#888"
         />
         <TouchableOpacity
-          style={[GlobalStyles.button]}
+          style={[GlobalStyles.sendButton]}
           onPress={sendMessage}
         >
           <Text style={GlobalStyles.buttonText}>Send</Text>
         </TouchableOpacity>
         <View style={GlobalStyles.mediaOptions}>
           <TouchableOpacity onPress={pickImage}>
-            <MaterialIcons name="photo" size={24} color="#FFFF" />
+            <MaterialIcons name="photo" size={30} color="#FFFF" />
           </TouchableOpacity>
         </View>
         <Modal
@@ -338,11 +345,11 @@ const Chat = () => {
           onRequestClose={closeImageModal}
         >
           <TouchableWithoutFeedback onPress={closeImageModal}>
-            <View style={styles.modalBackground}>
+            <View style={GlobalStyles.modalBackground}>
               {selectedImage ? (
                 <Image
                   source={{ uri: `${apiConfig.BASE_URL}${selectedImage}` }}
-                  style={styles.fullImage}
+                  style={GlobalStyles.fullImage}
                   resizeMode="contain"
                 />
               ) : null}
@@ -350,48 +357,12 @@ const Chat = () => {
           </TouchableWithoutFeedback>
         </Modal>
       </View>
+      </KeyboardAvoidingView>
     </View>
 
 
   );
 };
 
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  backButton: {
-    fontSize: 18,
-    color: '#007AFF',
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    marginLeft: 10,
-  },
-  messageList: {
-    flexGrow: 1,
-    padding: 10,
-    paddingBottom: 20,
-  },
-  messageItem: {
-    padding: 10,
-    borderRadius: 10,
-    marginBottom: 10,
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fullImage: {
-    width: '90%',
-    height: '90%',
-  },
-
-});
 
 export default Chat;

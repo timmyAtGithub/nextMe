@@ -4,8 +4,10 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import apiConfig from '../configs/apiConfig';
+import { useTheme } from '../settings/themeContext';
 
 const AddFriend: React.FC = () => {
+   const { GlobalStyles } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [sentRequests, setSentRequests] = useState<string[]>([]);
@@ -133,8 +135,8 @@ const AddFriend: React.FC = () => {
     }
 
     return (
-      <View style={styles.resultItem}>
-        <Text style={styles.name}>{item.name}</Text>
+      <View style={GlobalStyles.resultItem}>
+        <Text style={GlobalStyles.name}>{item.name}</Text>
         <TouchableOpacity
           onPress={() => sendFriendRequest(item.id)}
           disabled={isDisabled}
@@ -147,13 +149,13 @@ const AddFriend: React.FC = () => {
 
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity style={styles.backButton} onPress={() => router.push('../friends')}>
+    <View style={GlobalStyles.container}>
+      <TouchableOpacity style={GlobalStyles.backButton} onPress={() => router.push('../friends')}>
         <Ionicons name="arrow-back" size={24} color="#FFF" />
       </TouchableOpacity>
-
+        <View style={GlobalStyles.searchContainer}>
       <TextInput
-        style={styles.searchBar}
+        style={GlobalStyles.searchBar}
         placeholder="Search for users"
         placeholderTextColor="#AAA"
         value={searchQuery}
@@ -162,40 +164,18 @@ const AddFriend: React.FC = () => {
           searchUsers(text);
         }}
       />
-
+      </View>
       <FlatList
         data={results}
         keyExtractor={(item) => item.id.toString()}
         renderItem={renderItem}
         ListEmptyComponent={
           searchQuery.length > 0 && results.length === 0 ? (
-            <Text style={styles.emptyMessage}>No users found</Text>
+            <Text style={GlobalStyles.emptyMessage}>No users found</Text>
           ) : null
         }
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1, backgroundColor: '#1E1E1E', padding: 10
-  },
-  backButton: {
-    position: 'absolute', top: 40, left: 10, zIndex: 1
-  },
-  searchBar: {
-    backgroundColor: '#333', color: '#FFF', borderRadius: 10, padding: 10, marginBottom: 10, marginTop: 50
-  },
-  resultItem: {
-    flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 10, backgroundColor: '#292929', borderRadius: 10, marginBottom: 5
-  },
-  name: {
-    color: '#FFF', fontSize: 16
-  },
-  emptyMessage: {
-    color: '#AAA', textAlign: 'center', marginTop: 10
-  },
-});
-
 export default AddFriend;

@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert, } from 'react-native';
+import { View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, Image, TouchableWithoutFeedback, Modal, Alert, KeyboardAvoidingView, Platform, } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import GlobalStyles from '../../styles/globalStyles';
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import apiConfig from '../../configs/apiConfig';
+import { useTheme } from '@/app/settings/themeContext';
+
 
 interface Message {
   id: number;
@@ -19,6 +20,7 @@ interface Message {
 
 interface GroupDetails {
   name: string;
+  group_image_url: string;
   members: {
     id: number;
     name: string;
@@ -33,6 +35,7 @@ interface ChatHeaderProps {
 }
 
 const GroupChat = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
   const { groupId } = useLocalSearchParams();
   const flatListRef = useRef<FlatList>(null);
@@ -277,12 +280,12 @@ const GroupChat = () => {
   const ChatHeader: React.FC<ChatHeaderProps> = ({ groupName, groupImage, onBack }) => {
 
     return (
-      <View style={styles.headerContainer}>
-        <TouchableOpacity onPress={onBack} style={styles.backButton}>
+      <View style={GlobalStyles.headerContainer}>
+        <TouchableOpacity onPress={onBack} style={GlobalStyles.backButton}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
         </TouchableOpacity>
-        <Image source={{ uri: `${apiConfig.BASE_URL}${groupImage}` }} style={styles.groupImage} />
-        <Text style={styles.groupName}>{groupName}</Text>
+        <Image source={{ uri: `${apiConfig.BASE_URL}${groupImage}` }} style={GlobalStyles.groupImage} />
+        <Text style={GlobalStyles.groupName}>{groupName}</Text>
       </View>
     );
   };
@@ -290,7 +293,13 @@ const GroupChat = () => {
 
 
   return (
-    <View style={[styles.container, GlobalStyles.background]}>
+    
+    <View style={[GlobalStyles.container, GlobalStyles.background]}>
+      <KeyboardAvoidingView
+  style={{ flex: 1 }}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  keyboardVerticalOffset={35} 
+>
       <View style={[GlobalStyles.header]}>
         <TouchableOpacity onPress={() => router.push('/chats')}>
           <Ionicons name="arrow-back" size={24} color="#FFF" />
@@ -321,7 +330,7 @@ const GroupChat = () => {
           if (item.type === 'media') {
             return (
               <View style={isMyMessage ? GlobalStyles.rightBubble : GlobalStyles.leftBubble}>
-                <Text style={GlobalStyles.Bubbletext}>
+                <Text style={GlobalStyles.bubbleText}>
                   {item.username}:
                 </Text>
                 <TouchableOpacity onPress={() => openImageModal(item.content ?? '')}>
@@ -332,35 +341,41 @@ const GroupChat = () => {
           }
           return (
             <View style={isMyMessage ? GlobalStyles.rightBubble : GlobalStyles.leftBubble}>
-              <Text style={GlobalStyles.Bubbletext}>
+              <Text style={GlobalStyles.bubbleText}>
                 {item.username}:
               </Text>
-              <Text style={GlobalStyles.Bubbletext}>
+              <Text style={GlobalStyles.bubbleText}>
                 {item.text}
               </Text>
             </View>
           );
         }}
-        contentContainerStyle={styles.messageList}
-        onContentSizeChange={() => scrollToBottom(false)}
+        contentContainerStyle={GlobalStyles.messageList}
+        onContentSizeChange={() => scrollToBottom(false)}        
       />
+
+      
+      
+      
       <View style={[GlobalStyles.inputContainer]}>
         <TextInput
-          style={GlobalStyles.input}
+          style={GlobalStyles.inputChat}
           placeholder="Type a message..."
           value={newMessage}
           onChangeText={setNewMessage}
           placeholderTextColor="#888"
         />
-        <TouchableOpacity style={[GlobalStyles.button]} onPress={sendMessage}>
+        <TouchableOpacity style={[GlobalStyles.sendButton]} onPress={sendMessage}>
           <Text style={GlobalStyles.buttonText}>Send</Text>
         </TouchableOpacity>
         <View style={GlobalStyles.mediaOptions}>
           <TouchableOpacity onPress={pickImage}>
-            <MaterialIcons name="photo" size={24} color="#FFFF" />
+            <MaterialIcons name="photo" size={30} color="#FFFF" />
           </TouchableOpacity>
         </View>
       </View>
+
+      
 
       <Modal
         visible={isModalVisible}
@@ -369,54 +384,21 @@ const GroupChat = () => {
         onRequestClose={() => setModalVisible(false)}
       >
         <TouchableWithoutFeedback onPress={() => setModalVisible(false)}>
-          <View style={styles.modalBackground}>
+          <View style={GlobalStyles.modalBackground}>
             {selectedImage && (
               <Image
                 source={{ uri: `${apiConfig.BASE_URL}${selectedImage}` }}
-                style={styles.fullImage}
+                style={GlobalStyles.fullImage}
                 resizeMode="contain"
               />
             )}
           </View>
         </TouchableWithoutFeedback>
       </Modal>
+      </KeyboardAvoidingView>
     </View>
   );
 };
 
 export default GroupChat;
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  messageList: {
-    flexGrow: 1,
-    padding: 10,
-    paddingBottom: 20,
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fullImage: {
-    width: '90%',
-    height: '90%',
-  },
-  backButton: {
-    padding: 10,
-  },
-  groupImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-  },
-  groupName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginLeft: 10,
-  },
-});

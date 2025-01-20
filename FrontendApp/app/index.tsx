@@ -1,5 +1,12 @@
+import React from 'react';
 import { Redirect } from 'expo-router';
+import { ThemeProvider } from './settings/themeContext'; 
 
 export default function Index() {
-  return <Redirect href="./auth/login" />;
+  return (
+    <ThemeProvider>
+      <Redirect href="./auth/login" />
+    </ThemeProvider>
+  );
 }
+  

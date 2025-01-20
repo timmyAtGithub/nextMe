@@ -4,9 +4,10 @@ import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
 import apiConfig from '../configs/apiConfig';
-
+import { useTheme } from '../settings/themeContext';
 
 const Header: React.FC = () => {
+   const { GlobalStyles } = useTheme();
   const [userData, setUserData] = useState<{ username: string; profile_image: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -46,28 +47,28 @@ const Header: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={styles.header}>
+      <View style={GlobalStyles.userHeader}>
         <ActivityIndicator size="small" color="#FFFFFF" />
       </View>
     );
   }
 
   return (
-    <View style={styles.header}>
+    <View style={GlobalStyles.userHeader}>
       <TouchableOpacity onPress={() => router.push('./profile')}>
         {userData?.profile_image ? (
           <Image
             source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }}
-            style={styles.profileImage}
+            style={GlobalStyles.profileImage}
             onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
           />
         ) : (
-          <View style={[styles.profileImage, styles.placeholderImage]}>
-            <Text style={styles.placeholderText}>?</Text>
+          <View style={[GlobalStyles.profileImage, GlobalStyles.placeholderImage]}>
+            <Text style={GlobalStyles.placeholderText}>?</Text>
           </View>
         )}
       </TouchableOpacity>
-      <Text style={styles.username}>{userData?.username}</Text>
+      <Text style={GlobalStyles.text}>{userData?.username}</Text>
       <TouchableOpacity onPress={() => router.push('./friends')}>
         <Ionicons name="people-outline" size={24} color="#FFFFFF" />
       </TouchableOpacity>
@@ -75,42 +76,5 @@ const Header: React.FC = () => {
 
   );
 };
-
-const styles = StyleSheet.create({
-  header: {
-    zIndex: 1,
-    position: 'absolute',
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: 15,
-    left: 0,
-    right: 0,
-    backgroundColor: '#121212',
-    width: '100%',
-    height: '7%',
-    top: 0,
-  },
-  profileImage: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: '#CCCCCC',
-  },
-  placeholderImage: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  placeholderText: {
-    color: '#FFFFFF',
-    fontSize: 18,
-  },
-  username: {
-    color: '#FFFFFF',
-    fontSize: 18,
-    marginLeft: 10,
-    flex: 1,
-  },
-});
 
 export default Header;

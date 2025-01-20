@@ -1,6 +1,11 @@
 import React from 'react';
 import { View, Text, StyleSheet, Switch } from 'react-native';
 import { useTheme } from './themeContext';
+import { getGlobalStyles } from '../styles/globalStyles';
+import { useColorScheme } from 'react-native';
+
+const isDarkMode = useColorScheme() === 'dark';
+const GlobalStyles = getGlobalStyles(isDarkMode);
 
 const ThemeSettingsScreen: React.FC = () => {
   const { theme, toggleTheme } = useTheme();

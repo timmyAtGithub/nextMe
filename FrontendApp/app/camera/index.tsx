@@ -1,23 +1,17 @@
 import 'react-native-gesture-handler';
 import React, { useRef, useState } from 'react';
-import {
-  Button,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  Alert
-} from 'react-native';
-
+import {Button,Text,TouchableOpacity,View,} from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AntDesign } from '@expo/vector-icons';
 import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import * as MediaLibrary from 'expo-media-library';
-
 import PhotoPreviewSection from '../Components/PhotoPreviewSection';
 import BottomNavigation from '../Components/BottomNavigation';
+import { useTheme } from '../settings/themeContext';
+
 
 export default function Camera() {
+  const { GlobalStyles } = useTheme();
   const [facing, setFacing] = useState<CameraType>('back');
   const [permission, requestPermission] = useCameraPermissions();
   const [mediaLibraryPermission, requestMediaLibraryPermission] = MediaLibrary.usePermissions();
@@ -30,7 +24,7 @@ export default function Camera() {
 
   if (!permission.granted) {
     return (
-      <View style={styles.container}>
+      <View style={GlobalStyles.container}>
         <Text style={{ textAlign: 'center' }}>We need your permission to show the camera</Text>
         <Button onPress={requestPermission} title="grant permission" />
       </View>
@@ -39,7 +33,7 @@ export default function Camera() {
 
   if (!mediaLibraryPermission.granted) {
     return (
-      <View style={styles.container}>
+      <View style={GlobalStyles.container}>
         <Text style={{ textAlign: 'center' }}>We need your permission to save photos to your gallery</Text>
         <Button onPress={requestMediaLibraryPermission} title="grant permission" />
       </View>
@@ -77,13 +71,13 @@ export default function Camera() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <CameraView style={styles.camera} facing={facing} ref={cameraRef}>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+      <View style={GlobalStyles.container}>
+        <CameraView style={GlobalStyles.camera} facing={facing} ref={cameraRef}>
+          <View style={GlobalStyles.takePhotoContainer}>
+            <TouchableOpacity style={GlobalStyles.toggleButton} onPress={toggleCameraFacing}>
               <AntDesign name="retweet" size={44} color="black" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={handleTakePhoto}>
+            <TouchableOpacity style={GlobalStyles.takePhotoButton} onPress={handleTakePhoto}>
               <AntDesign name="camera" size={44} color="black" />
             </TouchableOpacity>
           </View>
@@ -93,32 +87,3 @@ export default function Camera() {
     </GestureHandlerRootView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  camera: {
-    flex: 1,
-  },
-  buttonContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    backgroundColor: 'transparent',
-    margin: 64,
-  },
-  button: {
-    flex: 1,
-    alignSelf: 'flex-end',
-    alignItems: 'center',
-    marginHorizontal: 10,
-    backgroundColor: 'white',
-    borderRadius: 10,
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-});

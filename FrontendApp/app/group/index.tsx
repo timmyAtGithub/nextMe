@@ -1,40 +1,23 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTheme } from '../settings/themeContext';
+
+
 
 const GroupMain = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
 
   return (
-    <View style={styles.container}>
+    <View style={GlobalStyles.container}>
       <TouchableOpacity
-        style={styles.createButton}
+        style={GlobalStyles.createButton}
         onPress={() => router.push('../groups/selectFriends')}
       >
-        <Text style={styles.buttonText}>Create Group</Text>
+        <Text style={GlobalStyles.buttonText}>Create Group</Text>
       </TouchableOpacity>
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1E1E1E',
-  },
-  createButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 16,
-    paddingHorizontal: 32,
-    borderRadius: 8,
-  },
-  buttonText: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: '600',
-  },
-});
-
 export default GroupMain;

@@ -4,6 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiConfig from '../configs/apiConfig';
+import { useTheme } from '../settings/themeContext';
+
+const { GlobalStyles } = useTheme();
+
 
 interface ContactData {
   username: string;
@@ -17,6 +21,8 @@ interface RemoveFriendResponse {
 }
 
 const ProfileImage = ({ uri }: { uri?: string }) => {
+  const { GlobalStyles } = useTheme();
+
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = (e: NativeSyntheticEvent<ImageErrorEventData>) => {
@@ -26,22 +32,25 @@ const ProfileImage = ({ uri }: { uri?: string }) => {
 
   if (!uri || imageError) {
     return (
-      <View style={styles.placeholderImage}>
+      <View style={GlobalStyles.placeholderImage}>
         <Ionicons name="person-outline" size={40} color="#FFF" />
       </View>
     );
   }
 
   return (
+    <View style={GlobalStyles.profileContainer}>
     <Image
       source={{ uri }}
-      style={styles.profileImage}
+      style={GlobalStyles.profileImageProfiles}
       onError={handleImageError}
     />
+    </View>
   );
 };
 
 const ConfirmationModal = ({
+  
   visible,
   onCancel,
   onConfirm,
@@ -50,6 +59,7 @@ const ConfirmationModal = ({
   onCancel: () => void;
   onConfirm: () => void;
 }) => (
+
   <Modal
     transparent={true}
     animationType="fade"
@@ -57,27 +67,27 @@ const ConfirmationModal = ({
     onRequestClose={onCancel}
   >
     <TouchableOpacity
-      style={styles.modalBackground}
+      style={GlobalStyles.modalBackground}
       activeOpacity={1}
       onPress={onCancel}
     >
-      <View style={styles.modalContent}>
-        <Text style={styles.modalTitle}>Remove Friend</Text>
-        <Text style={styles.modalText}>
+      <View style={GlobalStyles.modalContent}>
+        <Text style={GlobalStyles.modalTitle}>Remove Friend</Text>
+        <Text style={GlobalStyles.modalText}>
           Are you sure you want to remove this friend? This action cannot be undone.
         </Text>
-        <View style={styles.modalButtons}>
+        <View style={GlobalStyles.modalButtons}>
           <TouchableOpacity
-            style={styles.cancelButton}
+            style={GlobalStyles.cancelButton}
             onPress={onCancel}
           >
-            <Text style={styles.cancelButtonText}>Cancel</Text>
+            <Text style={GlobalStyles.cancelButtonText}>Cancel</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.confirmButton}
+            style={GlobalStyles.confirmButton}
             onPress={onConfirm}
           >
-            <Text style={styles.confirmButtonText}>Remove</Text>
+            <Text style={GlobalStyles.confirmButtonText}>Remove</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -86,6 +96,7 @@ const ConfirmationModal = ({
 );
 
 const ContactDetails = () => {
+  const { GlobalStyles } = useTheme();
   const router = useRouter();
   const { contactId } = useLocalSearchParams();
   const [showModal, setShowModal] = useState(false);
@@ -224,19 +235,19 @@ const ContactDetails = () => {
 
   if (isFetching) {
     return (
-      <View style={styles.loadingContainer}>
+      <View style={GlobalStyles.loadingContainer}>
         <ActivityIndicator size="large" color="#FFF" />
-        <Text style={styles.loadingText}>Loading contact details...</Text>
+        <Text style={GlobalStyles.loadingText}>Loading contact details...</Text>
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>{error}</Text>
-        <TouchableOpacity style={styles.retryButton} onPress={fetchContactData}>
-          <Text style={styles.retryButtonText}>Retry</Text>
+      <View style={GlobalStyles.errorContainer}>
+        <Text style={GlobalStyles.errorText}>{error}</Text>
+        <TouchableOpacity style={GlobalStyles.retryButton} onPress={fetchContactData}>
+          <Text style={GlobalStyles.retryButtonText}>Retry</Text>
         </TouchableOpacity>
       </View>
     );
@@ -244,68 +255,69 @@ const ContactDetails = () => {
 
   if (!contactData) {
     return (
-      <View style={styles.errorContainer}>
-        <Text style={styles.errorText}>No contact data found</Text>
+      <View style={GlobalStyles.errorContainer}>
+        <Text style={GlobalStyles.errorText}>No contact data found</Text>
       </View>
     );
   }
 
   return (
-    <View style={styles.container}>
+    <View style={GlobalStyles.container}>
       <TouchableOpacity
-        style={styles.backButton}
+        style={GlobalStyles.backButton}
         onPress={() => router.back()}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         <Ionicons name="arrow-back" size={24} color="#FFF" />
       </TouchableOpacity>
-
-      <ProfileImage uri={`${apiConfig.BASE_URL}${contactData.profile_image}`} />
-
-      <Text style={styles.contactName}>{contactData.username || 'Unknown'}</Text>
-      <Text style={styles.contactAbout}>{contactData.about || 'No details available'}</Text>
-
-      <TouchableOpacity
-        style={[styles.removeButton, isLoading && styles.removeButtonDisabled]}
-        onPress={() => setShowModal(true)}
-        disabled={isLoading}
-      >
-        {isLoading ? (
-          <ActivityIndicator size="small" color="#FFF" />
-        ) : (
-          <>
-            <Ionicons name="person-remove" size={20} color="#FFF" />
-            <Text style={styles.buttonText}>Remove Friend</Text>
-          </>
-        )}
-      </TouchableOpacity>
-      <TouchableOpacity
-  style={[styles.blockButton, isLoading && styles.blockButtonDisabled]}
-  onPress={blockUser}
-  disabled={isLoading}
->
-  {isLoading ? (
-    <ActivityIndicator size="small" color="#FFF" />
-  ) : (
-    <>
-      <Ionicons name="ban" size={20} color="#FFF" />
-      <Text style={styles.buttonText}>Block User</Text>
-    </>
-  )}
-</TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.createGroupButton}
+  
+      <View style={GlobalStyles.centeredProfileContainer}>
+        <ProfileImage uri={`${apiConfig.BASE_URL}${contactData.profile_image}`} />
+        <Text style={GlobalStyles.contactName}>{contactData.username || 'Unknown'}</Text>
+        <Text style={GlobalStyles.contactAbout}>{contactData.about || 'No details available'}</Text>
+      </View>
+  
+      <View style={GlobalStyles.actionContainer}>
+        <TouchableOpacity
+          style={[GlobalStyles.removeButton, isLoading && GlobalStyles.removeButtonDisabled]}
+          onPress={() => setShowModal(true)}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <>
+              <Ionicons name="person-remove" size={20} color="#FFF" />
+              <Text style={GlobalStyles.buttonText}>Remove Friend</Text>
+            </>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[GlobalStyles.blockButton, isLoading && GlobalStyles.blockButtonDisabled]}
+          onPress={blockUser}
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#FFF" />
+          ) : (
+            <>
+              <Ionicons name="ban" size={20} color="#FFF" />
+              <Text style={GlobalStyles.buttonText}>Block User</Text>
+            </>
+          )}
+        </TouchableOpacity>
+        <TouchableOpacity
+        style={GlobalStyles.createGroupButton}
         onPress={() => router.push({
           pathname: '/group/groupCreation',
           params: { preselectedFriend: contactId },
         })}
       >
         <Ionicons name="people-outline" size={20} color="#FFF" />
-        <Text style={styles.buttonText}>Create Group</Text>
+        <Text style={GlobalStyles.buttonText}>Create Group</Text>
       </TouchableOpacity>
-
-
+      </View>
+  
       <ConfirmationModal
         visible={showModal}
         onCancel={() => setShowModal(false)}
@@ -314,190 +326,5 @@ const ContactDetails = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#1E1E1E',
-    padding: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 40,
-    left: 20,
-    padding: 10,
-    zIndex: 1,
-  },
-  profileImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 20,
-  },
-  placeholderImage: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    marginBottom: 20,
-    backgroundColor: '#444',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  contactName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  contactAbout: {
-    fontSize: 16,
-    color: '#AAA',
-    textAlign: 'center',
-    marginBottom: 20,
-    paddingHorizontal: 20,
-  },
-  removeButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FF3B30',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginTop: 20,
-    minWidth: 180,
-  },
-  removeButtonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    fontSize: 16,
-    color: '#FFF',
-    marginLeft: 8,
-    fontWeight: '600',
-  },
-  modalBackground: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalContent: {
-    backgroundColor: '#2C2C2E',
-    padding: 24,
-    borderRadius: 16,
-    width: '85%',
-    maxWidth: 400,
-    alignItems: 'center',
-  },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginBottom: 12,
-  },
-  modalText: {
-    fontSize: 16,
-    color: '#AAA',
-    marginBottom: 24,
-    textAlign: 'center',
-    lineHeight: 22,
-  },
-  modalButtons: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
-  },
-  cancelButton: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 8,
-    backgroundColor: '#3A3A3C',
-    marginRight: 10,
-  },
-  confirmButton: {
-    flex: 1,
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 8,
-    backgroundColor: '#FF3B30',
-  },
-  cancelButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  confirmButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1E1E1E',
-  },
-  loadingText: {
-    color: '#FFF',
-    marginTop: 12,
-    fontSize: 16,
-  },
-  errorContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#1E1E1E',
-    padding: 20,
-  },
-  errorText: {
-    color: '#FF3B30',
-    fontSize: 16,
-    textAlign: 'center',
-    marginBottom: 20,
-  },
-  retryButton: {
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#FFF',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  createGroupButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#007AFF',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginTop: 20,
-    minWidth: 180,
-  },
-  blockButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FF3B30',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 10,
-    marginTop: 20,
-    minWidth: 180,
-  },
-  blockButtonDisabled: {
-    opacity: 0.6,
-  },
-  
-
-});
 
 export default ContactDetails;
