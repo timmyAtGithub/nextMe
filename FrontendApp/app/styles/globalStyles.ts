@@ -5,8 +5,8 @@ const lightTheme = {
   header:'#cecece',
   bottom:'#cecece',
   text: '#000000',
-  primary: '#6200EE',
-  secondary: '#03DAC6',
+  primary: '#fafafa',
+  secondary: '#e4e5f1',
   error: '#B00020',
   border: '#E0E0E0',
   link: '#1E90FF',
@@ -29,7 +29,7 @@ const darkTheme = {
   brandBlue: '#007AFF',
   destructive: '#FF3B30',
 };
-
+  
 export const getGlobalStyles = (isDarkMode: boolean) => {
   const theme = isDarkMode ? darkTheme : lightTheme;
   
@@ -68,7 +68,11 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       color: theme.text,
       textAlign: 'center',
       marginBottom: 20,
-
+    },
+    arrowBack: {
+      marginLeft: 5,    
+      alignItems: 'center',
+      top: '35%',
     },
 
     //AuthStyles
@@ -217,6 +221,11 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     chatListContainer: {
       flex: 1,
     },
+    messageContainer:{
+      flex: 1,
+      backgroundColor: theme.background,
+      top: '30%',
+    },
     chatList: {
       top: '10%',
       flexGrow: 1,
@@ -290,7 +299,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       zIndex: 10,
     },
     textElement: {
-      color: theme.text,
+      color: 'white',
       fontSize: 22,
       textAlign: 'center',
       textShadowColor: 'rgba(0, 0, 0, 0.75)',
@@ -501,6 +510,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       marginLeft: 10,
     },
     messageList: {
+      marginTop: '21%', 
       flexGrow: 1,
       padding: 10,
       paddingBottom: 20,
@@ -649,9 +659,32 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       flexDirection: 'row',
       alignItems: 'center',
     },
+    sendButtonRando: {
+      position: 'absolute',
+      bottom: 20,
+      alignSelf: 'center',
+      backgroundColor: 'rgba(255, 255, 255, 0.5)',
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 20,
+      zIndex: 10,
+    },
     username: {
       color: theme.text,
       fontSize: 16,
+    },
+    headerRandoPics:  {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      position: 'absolute',
+      top: 40,
+      left: 0,
+      right: 0,
+      paddingHorizontal: 15,
+      zIndex: 10,
+      backgroundColor: 'rgba(0, 0, 0, 0.3)',
+      borderRadius: 10,
     },
     loadingContainerPics: {
       justifyContent: 'center',
@@ -663,7 +696,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       paddingHorizontal: 15,
     },
     listContentPics: {
-      paddingTop: 10,
+      paddingTop: '11%',
       paddingBottom: 20,
     },
     pictureItemPics: {

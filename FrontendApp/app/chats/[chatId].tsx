@@ -7,7 +7,6 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import apiConfig from '../configs/apiConfig';
 import { useTheme } from '../settings/themeContext';
 
-
 const Chat = () => {
   const { GlobalStyles, currentTheme } = useTheme();
   const router = useRouter();
@@ -248,14 +247,11 @@ const Chat = () => {
 
   return (
     <View style={[GlobalStyles.container, GlobalStyles.background]}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={30} 
-      >
+ 
+      
       {chatDetails && (
         <View style={[GlobalStyles.header]}>
-          <TouchableOpacity onPress={() => router.push('/chats')}>
+          <TouchableOpacity style={GlobalStyles.arrowBack} onPress={() => router.push('/chats')}>
             <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
           </TouchableOpacity>
           <Image
@@ -265,9 +261,15 @@ const Chat = () => {
           <TouchableOpacity onPress={() => router.push({ pathname: `/profile/[contactId]`, params: { contactId: chatDetails.friend_id } })}>
             <Text style={GlobalStyles.headText}>{chatDetails.friend_username}</Text>
           </TouchableOpacity>
-
+     
         </View>
+
       )}
+
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0} >
       <FlatList
         ref={flatListRef}
         data={messages}
@@ -312,6 +314,7 @@ const Chat = () => {
               >
                 {item.text}
               </Text>
+             
              
             </View>
           );

@@ -295,11 +295,6 @@ const GroupChat = () => {
   return (
     
     <View style={[GlobalStyles.container, GlobalStyles.background]}>
-      <KeyboardAvoidingView
-  style={{ flex: 1 }}
-  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  keyboardVerticalOffset={35} 
->
       <View style={[GlobalStyles.header]}>
         <TouchableOpacity onPress={() => router.push('/chats')}>
           <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
@@ -319,6 +314,11 @@ const GroupChat = () => {
           <Text style={GlobalStyles.headText}>{groupDetails?.name}</Text>
         </TouchableOpacity>
       </View>
+      <KeyboardAvoidingView
+  style={{ flex: 1 }}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  keyboardVerticalOffset={0} 
+>
 
       <FlatList
         ref={flatListRef}

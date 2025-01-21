@@ -165,7 +165,7 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handl
           style={GlobalStyles.container}
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <View style={GlobalStyles.header}>
+          <View style={GlobalStyles.headerRandoPics}>
             <TouchableOpacity onPress={handleRetakePhoto}>
               <AntDesign name="close" size={24} color="white" />
             </TouchableOpacity>
@@ -277,7 +277,7 @@ const PhotoPreviewSection = ({ photo, handleRetakePhoto }: { photo: Photo; handl
           )}
 
           <View>
-            <TouchableOpacity style={GlobalStyles.sendButton} onPress={handleSendPhoto}>
+            <TouchableOpacity style={GlobalStyles.sendButtonRando} onPress={handleSendPhoto}>
               <Text style={GlobalStyles.sendButtonText}>Send</Text>
             </TouchableOpacity>
           </View>
