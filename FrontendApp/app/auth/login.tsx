@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, TouchableOpacity } from 'react-native';
+import { View, Text, TextInput, Button, TouchableOpacity, Image } from 'react-native';
 import { useRouter } from 'expo-router';
 import axios from 'axios';
 import * as Location from 'expo-location';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiConfig from '../configs/apiConfig';
 import { useTheme } from '../settings/themeContext';
-
 
 const LoginScreen: React.FC = () => {
   const { GlobalStyles, currentTheme } = useTheme();
@@ -83,32 +82,39 @@ const LoginScreen: React.FC = () => {
 
   return (
     <View style={GlobalStyles.container}>
-   <View style={GlobalStyles.authContainer}>
-      <Text style={GlobalStyles.title}>Login</Text>
-      {error && <Text style={{ color: 'red' }}>{error}</Text>}
+      
 
-      <TextInput
-        style={GlobalStyles.authInput}
-        placeholder="Username"
-        placeholderTextColor={currentTheme.subtleText}
-        value={username}
-        onChangeText={setUsername}
+      <View style={GlobalStyles.authContainer}>
+      <Image 
+        source={require('../assets/logo.png')} 
+        style={GlobalStyles.logo} 
+        resizeMode="contain"
       />
-      <TextInput
-        style={GlobalStyles.authInput}
-        placeholder="Password"
-        placeholderTextColor={currentTheme.subtleText}
-        secureTextEntry
-        value={password}
-        onChangeText={setPassword}
-      />
-      <Button title="Login" onPress={handleLogin} />
+        <Text style={GlobalStyles.title}>Login</Text>
+        {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
-      <TouchableOpacity onPress={handleRegister}>
-        <Text style={GlobalStyles.authText}>
-          Not registered yet? <Text style={GlobalStyles.authLink}>Register now</Text>
-        </Text>
-      </TouchableOpacity>
+        <TextInput
+          style={GlobalStyles.authInput}
+          placeholder="Username"
+          placeholderTextColor={currentTheme.subtleText}
+          value={username}
+          onChangeText={setUsername}
+        />
+        <TextInput
+          style={GlobalStyles.authInput}
+          placeholder="Password"
+          placeholderTextColor={currentTheme.subtleText}
+          secureTextEntry
+          value={password}
+          onChangeText={setPassword}
+        />
+        <Button title="Login" onPress={handleLogin} />
+
+        <TouchableOpacity onPress={handleRegister}>
+          <Text style={GlobalStyles.authText}>
+            Not registered yet? <Text style={GlobalStyles.authLink}>Register now</Text>
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
