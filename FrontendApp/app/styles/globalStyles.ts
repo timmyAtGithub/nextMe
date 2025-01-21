@@ -76,30 +76,46 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
 
     //AuthStyles
-    authInput: {
-      borderWidth: 1,
-      borderColor: theme.border,  
-      color: theme.text,
-      padding: 10,
-      borderRadius: 6,
-      marginVertical: 5,
-      width : '90%',
-      alignSelf:  'center',
-    },
-    authContainer: {
-      flex: 1,
-      backgroundColor: theme.background,
-      top: '30%',
-    },
-    authText: {
-      color: theme.text,
-      textAlign: 'center',
-      marginTop: 10,
-    },
-    authLink: {
-      color: theme.link,
-      fontWeight: 'bold',
-    },
+  
+    
+      authContainer: {
+        flex: 1,
+        backgroundColor: theme.background,
+        justifyContent: 'center',
+        alignItems: 'center',
+        paddingHorizontal: 20,
+        top: '-10%',
+        
+      },
+    
+      logo: {
+        width: 150,
+        height: 150,
+        marginBottom: -20,
+      },
+    
+      authInput: {
+        borderWidth: 1,
+        borderColor: theme.border,  
+        color: theme.text,
+        padding: 10,
+        borderRadius: 6,
+        marginVertical: 5,
+        width: '90%',
+        alignSelf: 'center',
+      },
+    
+      authText: {
+        color: theme.text,
+        textAlign: 'center',
+        marginTop: 10,
+      },
+    
+      authLink: {
+        color: theme.link,
+        fontWeight: 'bold',
+      },
+    
 
     //CameraStyles
     buttonContainer: {
@@ -907,7 +923,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     settingsContainer: {
       flex: 1,
       backgroundColor: theme.background,
-      top: '30%',
+      top: '15%',
     },
     textField: {
       padding: 16,
@@ -941,25 +957,23 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
 
     buttonContainer2: {
-      backgroundColor: theme.background,
-      borderRadius: 8,
-      padding: 16,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      elevation: 3,
-      borderWidth: 1,
-      borderColor: '#ccc',
-      alignSelf: 'center',
-      marginTop: 0,
-      marginBottom: 16,
-      width: '80%',
-      height: 60,
-      justifyContent: 'center',
+        borderWidth: 1,
+        borderColor: theme.border,
+        backgroundColor: theme.background,
+        width: '80%',
+        paddingVertical: 10,
+        paddingHorizontal: 16,
+        borderRadius: 5,
+        marginVertical: 8,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+        elevation: 3,
+        justifyContent: 'center',
+        alignSelf: 'center',
+        height: 60,  
     },
-    
-    
     
   });
 };
