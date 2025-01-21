@@ -4,14 +4,13 @@ import { useRouter } from 'expo-router';
 import axios from 'axios';
 import apiConfig from '../configs/apiConfig';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getGlobalStyles } from '../styles/globalStyles';
-import { useColorScheme } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useTheme } from './themeContext';
 
-const isDarkMode = useColorScheme() === 'dark';
-const GlobalStyles = getGlobalStyles(isDarkMode);
+
 
 const ChangePasswordScreen: React.FC = () => {
+  const { GlobalStyles, currentTheme } = useTheme();
   const router = useRouter();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -55,6 +54,7 @@ const ChangePasswordScreen: React.FC = () => {
       <TextInput
         style={GlobalStyles.input}
         placeholder="Current Password"
+        placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
         value={currentPassword}
         onChangeText={setCurrentPassword}
@@ -63,6 +63,7 @@ const ChangePasswordScreen: React.FC = () => {
       <TextInput
         style={GlobalStyles.input}
         placeholder="New Password"
+        placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
         value={newPassword}
         onChangeText={setNewPassword}
@@ -71,6 +72,7 @@ const ChangePasswordScreen: React.FC = () => {
       <TextInput
         style={GlobalStyles.input}
         placeholder="Confirm New Password"
+        placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
