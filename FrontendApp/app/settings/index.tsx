@@ -8,8 +8,7 @@ import BottomNavigation from '../Components/BottomNavigation';
 
 const SettingsScreen = () => {
   const router = useRouter();
-  const { GlobalStyles } = useTheme();
-  
+  const { GlobalStyles, currentTheme } = useTheme();
 
   const handleLogout = async () => {
     Alert.alert(
