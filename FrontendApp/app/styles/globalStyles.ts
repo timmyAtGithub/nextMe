@@ -907,25 +907,23 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     settingsContainer: {
       flex: 1,
       backgroundColor: theme.background,
-      top: '30%',
+      paddingTop: '30%', // Padding statt top
     },
     textField: {
       padding: 16,
-      backgroundColor: theme.background,
+      backgroundColor: theme.background || '#ffffff', // Fallback für theme
       borderRadius: 8,
-      shadowColor: '#000', 
+      shadowColor: '#000',
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 2,
-      color: theme.text,
-    },
-    error: {
-      color: theme.error,
-      marginBottom: 16,
+      color: theme.text || '#000000', // Fallback für theme
+      width: '80%',
+      alignSelf: 'center',
     },
     textContainer: {
-      backgroundColor: theme.background,
+      backgroundColor: theme.background || '#ffffff',
       borderRadius: 8,
       padding: 16,
       shadowColor: '#000',
@@ -933,12 +931,16 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       shadowRadius: 4,
       shadowOffset: { width: 0, height: 2 },
       elevation: 3,
+      width: '80%',
+      alignSelf: 'center',
     },
     bodyText: {
       fontSize: 16,
-      color: theme.text,
+      color: theme.text || '#000000',
       textAlign: 'left',
     },
+    
+    
   });
 };
 
