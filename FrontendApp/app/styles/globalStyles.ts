@@ -907,23 +907,25 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     settingsContainer: {
       flex: 1,
       backgroundColor: theme.background,
-      paddingTop: '30%', // Padding statt top
+      top: '30%',
     },
     textField: {
       padding: 16,
-      backgroundColor: theme.background || '#ffffff', // Fallback für theme
+      backgroundColor: theme.background,
       borderRadius: 8,
-      shadowColor: '#000',
+      shadowColor: '#000', 
       shadowOffset: { width: 0, height: 2 },
       shadowOpacity: 0.1,
       shadowRadius: 4,
       elevation: 2,
-      color: theme.text || '#000000', // Fallback für theme
-      width: '80%',
-      alignSelf: 'center',
+      color: theme.text,
+    },
+    error: {
+      color: theme.error,
+      marginBottom: 16,
     },
     textContainer: {
-      backgroundColor: theme.background || '#ffffff',
+      backgroundColor: theme.background,
       borderRadius: 8,
       padding: 16,
       shadowColor: '#000',
@@ -931,14 +933,32 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       shadowRadius: 4,
       shadowOffset: { width: 0, height: 2 },
       elevation: 3,
-      width: '80%',
-      alignSelf: 'center',
     },
     bodyText: {
       fontSize: 16,
-      color: theme.text || '#000000',
+      color: theme.text,
       textAlign: 'left',
     },
+
+    buttonContainer2: {
+      backgroundColor: theme.background,
+      borderRadius: 8,
+      padding: 16,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 3,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      alignSelf: 'center',
+      marginTop: 0,
+      marginBottom: 16,
+      width: '80%',
+      height: 60,
+      justifyContent: 'center',
+    },
+    
     
     
   });

@@ -36,28 +36,28 @@ const SettingsScreen = () => {
   return (
     <View style={GlobalStyles.container}>
       <View style={GlobalStyles.settingsContainer}>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => {}}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => {}}>
         <Text style={GlobalStyles.buttonText}>Notifications & Chat</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => {}}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => {}}>
         <Text style={GlobalStyles.buttonText}>Data & Storage</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => router.push('./settings/help')}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => router.push('./settings/help')}>
         <Text style={GlobalStyles.buttonText}>Help</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => router.push('./settings/changePassword')}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => router.push('./settings/changePassword')}>
         <Text style={GlobalStyles.buttonText}>Passwort ändern</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => router.push('./settings/about')}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => router.push('./settings/about')}>
         <Text style={GlobalStyles.buttonText}>About</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => router.push('./settings/apptheme')}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => router.push('./settings/apptheme')}>
         <Text style={GlobalStyles.buttonText}>App-Theme</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => router.push('./settings/background')}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => router.push('./settings/background')}>
         <Text style={GlobalStyles.buttonText}>Change Background</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={handleLogout}>
+      <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={handleLogout}>
         <Text style={GlobalStyles.buttonText}>Abmelden</Text>
       </TouchableOpacity>
       </View> 
