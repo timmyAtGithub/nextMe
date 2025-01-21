@@ -53,23 +53,22 @@ interface ImageFile {
               },
           });
 
-        console.log('API-Antwort erhalten:', response.data);
-
         if (response.data.recipients && response.data.recipients.length > 0) {
             alert(
-                `Bild wurde an folgende Benutzer gesendet:\n${response.data.recipients.join(', ')}`
+                `Picture was send`
             );
         } else {
-            alert('Kein Benutzer in der Nähe gefunden.');
         }
     } catch (error) {
         if (axios.isAxiosError(error)) {
-            console.error('Fehler beim Senden:', error.response?.data || error.message);
+            const serverMessage = error.response?.data?.message || 'An unknown server error occurred.';
+            alert(`Error: ${serverMessage}`);
+        } else if (error instanceof Error) {
+            alert(`Error: ${error.message}`);
         } else {
-            console.error('Fehler beim Senden:', (error as Error).message);
+            alert('An unknown error occurred.');
         }
-        alert('Es gab einen Fehler beim Senden des Bildes.');
     } finally {
-        console.log('Vorgang abgeschlossen.');
+        console.log('Request abgeschlossen.');
     }
 };
