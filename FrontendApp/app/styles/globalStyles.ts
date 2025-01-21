@@ -907,7 +907,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     settingsContainer: {
       flex: 1,
       backgroundColor: theme.background,
-      top: '30%',
+      top: '15%',
     },
     textField: {
       padding: 16,

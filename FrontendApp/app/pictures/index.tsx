@@ -33,7 +33,6 @@ const PicturesScreen: React.FC = () => {
       setPictures(response.data);
       console.log('Fetched pictures:', response.data);
     } catch (err) {
-      console.error('Error fetching pictures:', err);
     } finally {
       setLoading(false);
     }
