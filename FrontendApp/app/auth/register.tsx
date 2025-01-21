@@ -8,7 +8,7 @@ import { useTheme } from '../settings/themeContext';
 
 
 const RegisterScreen: React.FC = () => {
-  const { GlobalStyles } = useTheme();
+  const { GlobalStyles, currentTheme } = useTheme();
   const router = useRouter();
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -44,6 +44,7 @@ const RegisterScreen: React.FC = () => {
 
   return (
     <View style={GlobalStyles.container}>
+      <View style={GlobalStyles.authContainer}>
       <Text style={GlobalStyles.title}>Register</Text>
 
       {error && <Text style={{ color: 'red' }}>{error}</Text>}
@@ -51,24 +52,28 @@ const RegisterScreen: React.FC = () => {
       <TextInput
         style={GlobalStyles.input}
         placeholder="First Name"
+        placeholderTextColor={currentTheme.subtleText}
         value={firstName}
         onChangeText={setFirstName}
       />
       <TextInput
         style={GlobalStyles.input}
         placeholder="Last Name"
+        placeholderTextColor={currentTheme.subtleText}
         value={lastName}
         onChangeText={setLastName}
       />
       <TextInput
         style={GlobalStyles.input}
         placeholder="Username"
+        placeholderTextColor={currentTheme.subtleText}
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         style={GlobalStyles.input}
         placeholder="Phone Number"
+        placeholderTextColor={currentTheme.subtleText}
         keyboardType="phone-pad"
         value={phoneNumber}
         onChangeText={setPhoneNumber}
@@ -76,6 +81,7 @@ const RegisterScreen: React.FC = () => {
       <TextInput
         style={GlobalStyles.input}
         placeholder="Password"
+        placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -83,6 +89,7 @@ const RegisterScreen: React.FC = () => {
       <TextInput
         style={GlobalStyles.input}
         placeholder="Confirm Password"
+        placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
         value={confirmPassword}
         onChangeText={setConfirmPassword}
@@ -95,6 +102,7 @@ const RegisterScreen: React.FC = () => {
           Already have an account? <Text style={GlobalStyles.authLink}>Login</Text>
         </Text>
       </TouchableOpacity>
+      </View>
     </View>
   );
 };

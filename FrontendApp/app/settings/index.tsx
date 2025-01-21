@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, View, Button, ScrollView, Text, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from './themeContext';
@@ -35,7 +35,7 @@ const SettingsScreen = () => {
 
   return (
     <View style={GlobalStyles.container}>
-
+      <View style={GlobalStyles.settingsContainer}>
       <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={() => {}}>
         <Text style={GlobalStyles.buttonText}>Notifications & Chat</Text>
       </TouchableOpacity>
@@ -60,8 +60,9 @@ const SettingsScreen = () => {
       <TouchableOpacity style={GlobalStyles.buttonContainer} onPress={handleLogout}>
         <Text style={GlobalStyles.buttonText}>Abmelden</Text>
       </TouchableOpacity>
+      </View> 
       <BottomNavigation />
-
+      
     </View>
   
   );

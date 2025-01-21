@@ -7,7 +7,7 @@ import apiConfig from '../configs/apiConfig';
 import { useTheme } from '../settings/themeContext';
 
 const AddFriend: React.FC = () => {
-   const { GlobalStyles } = useTheme();
+   const { GlobalStyles, currentTheme } = useTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [results, setResults] = useState([]);
   const [sentRequests, setSentRequests] = useState<string[]>([]);
@@ -151,7 +151,7 @@ const AddFriend: React.FC = () => {
   return (
     <View style={GlobalStyles.container}>
       <TouchableOpacity style={GlobalStyles.backButton} onPress={() => router.push('../friends')}>
-        <Ionicons name="arrow-back" size={24} color="#FFF" />
+        <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
       </TouchableOpacity>
         <View style={GlobalStyles.searchContainer}>
       <TextInput

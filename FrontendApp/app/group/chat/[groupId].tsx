@@ -35,7 +35,7 @@ interface ChatHeaderProps {
 }
 
 const GroupChat = () => {
-  const { GlobalStyles } = useTheme();
+  const { GlobalStyles, currentTheme } = useTheme();
   const router = useRouter();
   const { groupId } = useLocalSearchParams();
   const flatListRef = useRef<FlatList>(null);
@@ -282,7 +282,7 @@ const GroupChat = () => {
     return (
       <View style={GlobalStyles.headerContainer}>
         <TouchableOpacity onPress={onBack} style={GlobalStyles.backButton}>
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
+          <Ionicons name="arrow-back" size={24} color={currentTheme.text}/>
         </TouchableOpacity>
         <Image source={{ uri: `${apiConfig.BASE_URL}${groupImage}` }} style={GlobalStyles.groupImage} />
         <Text style={GlobalStyles.groupName}>{groupName}</Text>
@@ -295,14 +295,9 @@ const GroupChat = () => {
   return (
     
     <View style={[GlobalStyles.container, GlobalStyles.background]}>
-      <KeyboardAvoidingView
-  style={{ flex: 1 }}
-  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-  keyboardVerticalOffset={35} 
->
       <View style={[GlobalStyles.header]}>
         <TouchableOpacity onPress={() => router.push('/chats')}>
-          <Ionicons name="arrow-back" size={24} color="#FFF" />
+          <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
         </TouchableOpacity>
 
         {(() => {
@@ -310,15 +305,20 @@ const GroupChat = () => {
           return (
             <Image
               source={{ uri: `${apiConfig.BASE_URL}${groupDetails?.group_image_url}` }}
-              style={GlobalStyles.profileImage}
+              style={GlobalStyles.headProfileImage}
             />
           );
         })()}
 
         <TouchableOpacity onPress={() => router.push({ pathname: `../details/${groupId}` })}>
-          <Text style={GlobalStyles.title}>{groupDetails?.name}</Text>
+          <Text style={GlobalStyles.headText}>{groupDetails?.name}</Text>
         </TouchableOpacity>
       </View>
+      <KeyboardAvoidingView
+  style={{ flex: 1 }}
+  behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+  keyboardVerticalOffset={0} 
+>
 
       <FlatList
         ref={flatListRef}

@@ -12,7 +12,7 @@ import { useTheme } from '../settings/themeContext';
 
 
 const Profile: React.FC = () => {
-  const { GlobalStyles } = useTheme();
+  const { GlobalStyles, currentTheme} = useTheme();
   const router = useRouter();
   const [userData, setUserData] = useState<{
     username: string;
@@ -198,7 +198,7 @@ const Profile: React.FC = () => {
   return (
     <View style={GlobalStyles.container}>
       <TouchableOpacity style={GlobalStyles.backButton} onPress={() => router.push('/chats')}>
-        <Ionicons name="arrow-back" size={24} color="#FFFFFF" />
+        <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
       </TouchableOpacity>
       <View style={GlobalStyles.profileSection}>
         <TouchableOpacity onPress={pickImage} disabled={isUploading}>
