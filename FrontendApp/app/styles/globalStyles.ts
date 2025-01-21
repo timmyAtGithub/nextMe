@@ -525,13 +525,42 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
 
     //GroupsStyles
+    dereineknopf:{
+      marginLeft: 10,
+    },
+    containergroup:{
+      flex: 1,
+      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+
+    arrowback:{
+      marginLeft: 10,
+    },
+    
     groupImage: {
-      width: 40,
-      height: 40,
+      textAlign: 'center',
+      width: 200,
+      height: 200,
       borderRadius: 20,
+      display: 'flex',
+      justifyContent: 'center',
+      overflow: 'hidden',
+    },
+
+    groupImagefull: {
+      
+      width: 150,
+      height: 150,
+      borderRadius: 20,
+      display: 'flex',
+      justifyContent: 'center',
+      overflow: 'hidden',
     },
     groupName: {
-      fontSize: 18,
+      textAlign: 'center',
+      fontSize: 50,
       color: theme.text,
       marginLeft: 10,
     },
