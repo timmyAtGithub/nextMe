@@ -35,13 +35,13 @@ const SettingsScreen = () => {
   return (
     <View style={GlobalStyles.container}>
       <View style={GlobalStyles.settingsContainer}>
-        <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => {}}>
+        <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() =>router.push('./settings/rights')}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Icon name="notifications" size={24} color={currentTheme.text} style={{ marginRight: 8 }} />
             <Text style={GlobalStyles.buttonText}>Notifications & Chat</Text>
           </View>
         </TouchableOpacity>
-        <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => {}}>
+        <TouchableOpacity style={GlobalStyles.buttonContainer2} onPress={() => router.push('./settings/notification')}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
             <Icon name="storage" size={24} color={currentTheme.text} style={{ marginRight: 8 }} />
             <Text style={GlobalStyles.buttonText}>Data & Storage</Text>
