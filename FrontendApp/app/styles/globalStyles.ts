@@ -76,6 +76,16 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
 
     //AuthStyles
+    authInput: {
+      borderWidth: 1,
+      borderColor: theme.border,  
+      color: theme.text,
+      padding: 10,
+      borderRadius: 6,
+      marginVertical: 5,
+      width : '90%',
+      alignSelf:  'center',
+    },
     authContainer: {
       flex: 1,
       backgroundColor: theme.background,

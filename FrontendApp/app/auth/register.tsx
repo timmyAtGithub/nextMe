@@ -50,28 +50,28 @@ const RegisterScreen: React.FC = () => {
       {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="First Name"
         placeholderTextColor={currentTheme.subtleText}
         value={firstName}
         onChangeText={setFirstName}
       />
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="Last Name"
         placeholderTextColor={currentTheme.subtleText}
         value={lastName}
         onChangeText={setLastName}
       />
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="Username"
         placeholderTextColor={currentTheme.subtleText}
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="Phone Number"
         placeholderTextColor={currentTheme.subtleText}
         keyboardType="phone-pad"
@@ -79,7 +79,7 @@ const RegisterScreen: React.FC = () => {
         onChangeText={setPhoneNumber}
       />
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="Password"
         placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
@@ -87,7 +87,7 @@ const RegisterScreen: React.FC = () => {
         onChangeText={setPassword}
       />
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="Confirm Password"
         placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
