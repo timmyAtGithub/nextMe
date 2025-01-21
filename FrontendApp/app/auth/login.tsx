@@ -88,14 +88,14 @@ const LoginScreen: React.FC = () => {
       {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="Username"
         placeholderTextColor={currentTheme.subtleText}
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
-        style={GlobalStyles.input}
+        style={GlobalStyles.authInput}
         placeholder="Password"
         placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
