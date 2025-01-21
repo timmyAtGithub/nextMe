@@ -9,7 +9,7 @@ import { useTheme } from '../settings/themeContext';
 
 
 const Chat = () => {
-  const { GlobalStyles } = useTheme();
+  const { GlobalStyles, currentTheme } = useTheme();
   const router = useRouter();
   const { chatId } = useLocalSearchParams();
   const flatListRef = useRef<FlatList>(null);
@@ -256,14 +256,14 @@ const Chat = () => {
       {chatDetails && (
         <View style={[GlobalStyles.header]}>
           <TouchableOpacity onPress={() => router.push('/chats')}>
-            <Ionicons name="arrow-back" size={24} color="#FFF" />
+            <Ionicons name="arrow-back" size={24} color={currentTheme.text} />
           </TouchableOpacity>
           <Image
             source={{ uri: `${apiConfig.BASE_URL}${chatDetails.friend_profile_image}` }}
-            style={GlobalStyles.profileImage}
+            style={GlobalStyles.headProfileImage}
           />
-          <TouchableOpacity onPress={() => router.push({ pathname: `../profile/${chatDetails.friend_id}` })}>
-            <Text style={GlobalStyles.headerText}>{chatDetails.friend_username}</Text>
+          <TouchableOpacity onPress={() => router.push({ pathname: `/profile/[contactId]`, params: { contactId: chatDetails.friend_id } })}>
+            <Text style={GlobalStyles.headText}>{chatDetails.friend_username}</Text>
           </TouchableOpacity>
 
         </View>

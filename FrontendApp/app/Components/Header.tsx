@@ -7,7 +7,7 @@ import apiConfig from '../configs/apiConfig';
 import { useTheme } from '../settings/themeContext';
 
 const Header: React.FC = () => {
-   const { GlobalStyles } = useTheme();
+   const { GlobalStyles,theme } = useTheme();
   const [userData, setUserData] = useState<{ username: string; profile_image: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -59,18 +59,18 @@ const Header: React.FC = () => {
         {userData?.profile_image ? (
           <Image
             source={{ uri: `${apiConfig.BASE_URL}${userData.profile_image}` }}
-            style={GlobalStyles.profileImage}
+            style={GlobalStyles.headProfileImage}
             onError={(error) => console.error('Image loading error:', error.nativeEvent.error)}
           />
         ) : (
-          <View style={[GlobalStyles.profileImage, GlobalStyles.placeholderImage]}>
+          <View style={[GlobalStyles.headProfileImage, GlobalStyles.placeholderImage]}>
             <Text style={GlobalStyles.placeholderText}>?</Text>
           </View>
         )}
       </TouchableOpacity>
-      <Text style={GlobalStyles.text}>{userData?.username}</Text>
+      <Text style={GlobalStyles.headText}>{userData?.username}</Text>
       <TouchableOpacity onPress={() => router.push('./friends')}>
-        <Ionicons name="people-outline" size={24} color="#FFFFFF" />
+       <Image source={ theme === 'dark' ? require('../assets/dark-friends-icon.png') : require('../assets/light-friends-icon.png') } style={GlobalStyles.headFriend}/>
       </TouchableOpacity>
     </View>
 

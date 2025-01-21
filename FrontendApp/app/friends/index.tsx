@@ -9,7 +9,7 @@ import apiConfig from '../configs/apiConfig';
 import { useTheme } from '../settings/themeContext';
 
 const Friends: React.FC = () => {
-   const { GlobalStyles } = useTheme();
+   const { GlobalStyles, currentTheme } = useTheme();
   const [friends, setFriends] = useState<any[]>([]);
   const [friendRequests, setFriendRequests] = useState<{ id: string | number; profile_image: string; sender_name: string }[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -137,7 +137,7 @@ const Friends: React.FC = () => {
     onChangeText={setSearchQuery}
   />
   <TouchableOpacity style={GlobalStyles.addButton} onPress={() => router.push('/friends/add')}>
-    <Ionicons name="add-circle-outline" size={30} color="#FFF" />
+    <Ionicons name="add-circle-outline" size={30} color={currentTheme.text} />
   </TouchableOpacity>
 </View>
 

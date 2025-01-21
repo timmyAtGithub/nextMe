@@ -9,7 +9,7 @@ import { useTheme } from '../settings/themeContext';
 
 
 const LoginScreen: React.FC = () => {
-  const { GlobalStyles } = useTheme();
+  const { GlobalStyles, currentTheme } = useTheme();
   const router = useRouter();
 
   const [username, setUsername] = useState('');
@@ -83,18 +83,21 @@ const LoginScreen: React.FC = () => {
 
   return (
     <View style={GlobalStyles.container}>
+   <View style={GlobalStyles.authContainer}>
       <Text style={GlobalStyles.title}>Login</Text>
       {error && <Text style={{ color: 'red' }}>{error}</Text>}
 
       <TextInput
         style={GlobalStyles.input}
         placeholder="Username"
+        placeholderTextColor={currentTheme.subtleText}
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         style={GlobalStyles.input}
         placeholder="Password"
+        placeholderTextColor={currentTheme.subtleText}
         secureTextEntry
         value={password}
         onChangeText={setPassword}
@@ -106,6 +109,7 @@ const LoginScreen: React.FC = () => {
           Not registered yet? <Text style={GlobalStyles.authLink}>Register now</Text>
         </Text>
       </TouchableOpacity>
+      </View>
     </View>
   );
 };

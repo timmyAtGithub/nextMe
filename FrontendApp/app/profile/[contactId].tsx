@@ -6,9 +6,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import apiConfig from '../configs/apiConfig';
 import { useTheme } from '../settings/themeContext';
 
-const { GlobalStyles } = useTheme();
-
-
 interface ContactData {
   username: string;
   profile_image?: string;
@@ -22,7 +19,6 @@ interface RemoveFriendResponse {
 
 const ProfileImage = ({ uri }: { uri?: string }) => {
   const { GlobalStyles } = useTheme();
-
   const [imageError, setImageError] = useState(false);
 
   const handleImageError = (e: NativeSyntheticEvent<ImageErrorEventData>) => {
@@ -50,14 +46,15 @@ const ProfileImage = ({ uri }: { uri?: string }) => {
 };
 
 const ConfirmationModal = ({
-  
   visible,
   onCancel,
   onConfirm,
+  GlobalStyles,
 }: {
   visible: boolean;
   onCancel: () => void;
   onConfirm: () => void;
+  GlobalStyles: any;
 }) => (
 
   <Modal
@@ -322,6 +319,7 @@ const ContactDetails = () => {
         visible={showModal}
         onCancel={() => setShowModal(false)}
         onConfirm={removeFriend}
+        GlobalStyles={GlobalStyles}
       />
     </View>
   );

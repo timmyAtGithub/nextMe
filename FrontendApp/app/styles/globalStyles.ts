@@ -56,8 +56,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
     input: {
       borderWidth: 1,
-      borderColor: theme.border,
-      backgroundColor: theme.background,
+      borderColor: theme.border,  
       color: theme.text,
       padding: 10,
       borderRadius: 5,
@@ -69,9 +68,15 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       color: theme.text,
       textAlign: 'center',
       marginBottom: 20,
+
     },
 
     //AuthStyles
+    authContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
+      top: '30%',
+    },
     authText: {
       color: theme.text,
       textAlign: 'center',
@@ -131,25 +136,41 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       color: theme.text,
       width: '70%',
       padding: 10,
+      bottom: 10,
       borderRadius: 5,
       marginVertical: 5,
     },
     header: {
+      zIndex: 1,
+      position: 'absolute',
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 10,
-      backgroundColor: 'rgba(0, 0, 0, 0.6)',
+      paddingHorizontal: 30,          
+      paddingVertical: 30,            
+      left: 0,
+      right: 0,
+      backgroundColor: theme.header,
+      width: '100%',
+      height: '11%',                    
+      top: 0,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
     },
     headerText: {
       color: theme.text,
       fontSize: 20,
       margin: 10,
+      padding: 10,
+      flexShrink: 1,                 
+      marginHorizontal: 10,           
+      textAlign: 'center', 
     },
     profileImage: {
       width: 50,
       height: 50,
       borderRadius: 20,
       backgroundColor: theme.border,
+      marginRight: 10,
     },
     profileImageList: {
       width: 45,
@@ -179,6 +200,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     mediaOptions: {
       flexDirection: 'row',
       justifyContent: 'space-around',
+      bottom: 10,
     },
     bubbleText: {
       color: theme.text,
@@ -190,6 +212,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       paddingVertical: 10,
       paddingHorizontal: 20,
       borderRadius: 5,
+      bottom: 10,
     },
     chatListContainer: {
       flex: 1,
@@ -248,7 +271,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       flexDirection: 'row',
       justifyContent: 'space-around',
       alignItems: 'center',
-      padding: 10,
+      padding: 20,
       backgroundColor: theme.bottom,
       left: 0,
       right: 0,
@@ -256,6 +279,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       width: '100%',
     },
     navIcon: {
+      bottom: 10,
       width: 35,
       height: 35,
     },
@@ -283,22 +307,49 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       alignSelf: 'center',
     },
 
-    //Header
     userHeader: {
       zIndex: 1,
       position: 'absolute',
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: 15,
+      justifyContent: 'space-between', 
+      paddingHorizontal: 30,          
+      paddingVertical: 30,            
       left: 0,
       right: 0,
       backgroundColor: theme.header,
       width: '100%',
-      height: '8%',
+      height: '11%',                    
       top: 0,
+      borderBottomWidth: 1,
+      borderBottomColor: theme.border,
     },
-
+    
+    headProfileImage: {
+      top: '35%',
+      width: 50,
+      height: 50,
+      borderRadius: 25,               
+      backgroundColor: theme.border,
+    },
+    
+    headText: {
+      top: '35%',
+      color: theme.text,
+      fontSize: 18,
+      textAlign: 'center',
+      flex: 1,                        
+      marginLeft: 10,                 
+    },
+    
+    headFriend: {
+      top: '38%',
+      height: 52,
+      width: 70,
+      padding: 10,                    
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
     placeholderImage: {
       justifyContent: 'center',
       alignItems: 'center',
@@ -474,12 +525,10 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       borderBottomColor: theme.border,
     },
     inputContainer: {
-      borderWidth: 1,
-      borderColor: 'red',
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-between',
-      bottom: 0,
+      padding: 10,
       backgroundColor: theme.secondary,
     },
     groupDescription: {
@@ -812,6 +861,11 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
 
     //Settings
+    settingsContainer: {
+      flex: 1,
+      backgroundColor: theme.background,
+      top: '30%',
+    },
     textField: {
       padding: 16,
       backgroundColor: theme.background,
