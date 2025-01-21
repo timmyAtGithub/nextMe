@@ -23,7 +23,7 @@ const registerUser = async (req, res) => {
       [firstName, lastName, username, number, hashedPassword]
     );
 
-    res.status(201).json({ message: 'Benutzer erstellt!', user: result.rows[0] });
+    res.status(201).json({ message: 'User created successfully', user: result.rows[0] });
   } catch (err) {
     console.error('Server Error:', err.message);
     res.status(500).send('Server Error');
