@@ -9,8 +9,8 @@ const GlobalStyles = getGlobalStyles(isDarkMode);
 const VersionText = () => {
   return (
     <View style={GlobalStyles.container}>
-      <View style={GlobalStyles.textField}>
-        <Text style={GlobalStyles.text}>Beta Version</Text>
+      <View style={GlobalStyles.versiontextField}>
+        <Text style={GlobalStyles.textversion}>Beta Version</Text>
       </View>
     </View>
   );

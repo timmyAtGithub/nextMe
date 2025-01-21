@@ -530,9 +530,10 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
     containergroup:{
       flex: 1,
-      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+      backgroundColor: 'black',
       justifyContent: 'center',
       alignItems: 'center',
+      
     },
 
     arrowback:{
@@ -547,6 +548,7 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
       display: 'flex',
       justifyContent: 'center',
       overflow: 'hidden',
+      top:'30%',
     },
 
     groupImagefull: {
@@ -949,6 +951,21 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
 
     //Settings
+
+    versiontextField:{
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      top:'50%',
+      fontSize: 50,
+      color: theme.text,
+    },
+
+    textversion:{
+      fontSize: 50,
+      color: theme.text,
+    },
+
     settingsContainer: {
       flex: 1,
       backgroundColor: theme.background,
