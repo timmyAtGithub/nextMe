@@ -162,23 +162,19 @@ const GroupDetails = () => {
  
   return (
     
-    
-  
-    <View style={GlobalStyles.containergroup}>
+     <View style={GlobalStyles.container}>
+          <TouchableOpacity
+            style={GlobalStyles.backButton}
+            onPress={() => router.back()}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="arrow-back" size={24} color="#FFF" />
+          </TouchableOpacity>
       
-      <TouchableOpacity
-    style={GlobalStyles.backButton}
-    onPress={() => router.back()}
-    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-  >
-    <Ionicons name="arrow-back" size={24} color="#FFF" style={GlobalStyles.arrowback}/>
-  </TouchableOpacity>
- 
+          <View style={GlobalStyles.centeredProfileContainer}>
       <Image  source={{uri:`${apiConfig.BASE_URL}${groupData.group_image_url}`}} style={GlobalStyles.groupImagefull} />
- 
       <Text style={GlobalStyles.groupName}>{groupData.name || 'Unknown Group'}</Text>
-      <Text style={GlobalStyles.groupDescription}>{groupData.description || 'No description available'}</Text>
- 
+      <Text style={GlobalStyles.groupDescription}>{groupData.description || 'No description available'}</Text> 
       <Text style={GlobalStyles.membersTitle}>Group Members</Text>
       <FlatList
         data={members}
@@ -199,6 +195,7 @@ const GroupDetails = () => {
         )}
         contentContainerStyle={GlobalStyles.membersList}
       />
+    </View>
     </View>
   );
 };

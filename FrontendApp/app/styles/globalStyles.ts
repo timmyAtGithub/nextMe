@@ -379,8 +379,8 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     
     headFriend: {
       top: '38%',
-      height: 52,
-      width: 70,
+      height: 45,
+      width: 60,
       padding: 10,                    
       justifyContent: 'center',
       alignItems: 'center',
@@ -552,10 +552,9 @@ export const getGlobalStyles = (isDarkMode: boolean) => {
     },
 
     groupImagefull: {
-      
       width: 150,
       height: 150,
-      borderRadius: 20,
+      borderRadius: 75,
       display: 'flex',
       justifyContent: 'center',
       overflow: 'hidden',

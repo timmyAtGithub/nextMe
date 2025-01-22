@@ -7,4 +7,4 @@ fi
 
 node server.js &
 
-ngrok http 5000 --authtoken="$TOKEN" --region=eu --url=pumped-ladybird-emerging.ngrok-free.app
+ngrok http 5000 --authtoken="$TOKEN" --region=eu --url=largely-quick-dove.ngrok-free.app

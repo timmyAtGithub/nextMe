@@ -10,13 +10,13 @@ const TextWithTitleScreen = () => {
   return (
     <ScrollView contentContainerStyle={GlobalStyles.container}>
       <View style={GlobalStyles.headerContainer}>
-        <Text style={GlobalStyles.headerText}>So funktioniert die App</Text>
+        <Text style={GlobalStyles.headerText}>How the app works</Text>
       </View>
       <View style={GlobalStyles.textContainer}>
         <Text style={GlobalStyles.bodyText}>
-        Ah, du hast also endlich diese bahnbrechende App gefunden, die es dir ermöglicht, Bilder mit völlig fremden Menschen in deiner Nähe zu teilen? Wie aufregend! Kein Grund mehr, deine Momente für dich zu behalten – schließlich ist nichts sicherer als die Idee, dass jeder in deiner Umgebung wissen muss, was du gerade isst, wo du bist oder wie du dich in diesem exakt perfekten Winkel fotografiert hast. Alles, was du tun musst, ist ein Foto auszuwählen (hoffentlich ist es nicht das peinliche, das du gestern gemacht hast), und dann – tada! – mit einem simplen Klick auf "Teilen" ist es schon in den Händen von Unbekannten, die in der Nähe herumlaufen.
+        Ah, so you’ve finally found that groundbreaking app that lets you share pictures with total strangers near you? How exciting! No more keeping your moments to yourself – after all, nothing’s safer than the idea that everyone around you must know what you’re eating, where you are, or how you’ve been photographed in that perfectly angled shot. All you have to do is choose a photo (hopefully not the embarrassing one you took yesterday), and then – tada! – with a simple click on "Share," it’s already in the hands of strangers roaming nearby.
 
-Natürlich sorgt die Funktion „In der Nähe“ dafür, dass du sofort mit den Leuten verbunden wirst, die du nie wieder sehen willst. Wer braucht schon private Alben, wenn du den Zauber des öffentlichen Lebens so hautnah erleben kannst? Und keine Sorge, deine Privatsphäre ist garantiert unantastbar – schließlich hast du das Foto ja freiwillig hochgeladen, und wer würde schon hinterfragen, ob jemand anders das gleiche Foto in ein paar Minuten weiterverbreitet? Viel Spaß beim Posten deiner intimsten Momente – und denk dran, in ein paar Jahren kannst du dich dann wundern, warum du in keiner App mehr sicher bist.
+Of course, the “Near Me” feature ensures you’re instantly connected with people you’ll never want to see again. Who needs private albums when you can experience the magic of public life up close? And don’t worry, your privacy is absolutely secure – after all, you voluntarily uploaded the photo, and who would question if someone else shares the same picture in a few minutes? Have fun posting your most intimate moments – and remember, in a few years, you might wonder why you’re no longer safe in any app.
         </Text>
       </View>
     </ScrollView>
