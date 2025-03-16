@@ -35,7 +35,18 @@ Install the required npm packages:
 npm install
 ```
 
-## 3. Use Docker Compose
+### 3. Set Up Environment Variables
+
+Create a apiConfig.js and add your URL like
+```js
+const apiConfig = {
+    BASE_URL: 'YOUR_URL',
+  };
+
+  module.exports = apiConfig;
+```
+
+## 4. Use Docker Compose
 
 The project includes a `docker-compose.yml` file that runs the backend and the PostgreSQL database in Docker containers. Run the following command to start the containers:
 
@@ -45,7 +56,7 @@ docker-compose up --build
 
 This command builds the Docker images and starts the containers. The backend will be available on port 5000, and the PostgreSQL database on port 5432.
 
-## 4. Set Up Ngrok for Public Access
+## 5. Set Up Ngrok for Public Access
 
 To make the local server publicly accessible, use Ngrok. Run the following command:
 
@@ -55,19 +66,19 @@ To make the local server publicly accessible, use Ngrok. Run the following comma
 
 This script starts the server and uses Ngrok to create a public tunnel.
 
-## 5. Access the Server
+## 6. Access the Server
 
 Once the server and Ngrok are running, you can access the server via the following URLs:
 
 - Locally: [http://localhost:5000](http://localhost:5000)
 - Publicly: The Ngrok-provided URL (displayed in the console)
 
-## 6. Additional Information
+## 7. Additional Information
 
 - **Database Queries**: Test the database connection by calling the root route (`/`), which executes a simple query and returns the current date.
 - **Static Files**: Uploaded files are stored in the `uploads` directory and can be accessed via the `/uploads` route.
 
-## 7. Stop the Server
+## 8. Stop the Server
 
 To stop the server and Ngrok, press `Ctrl + C` in the corresponding terminal windows. To stop the Docker containers, run the following command:
 
