@@ -19,6 +19,6 @@ cd nextMe
 
 For detailed setup instructions for each part of the project, please refer to the individual README files:
 
-- [Frontend README](./frontend/README.md)
+- [Frontend README](./FrontendAPP/README.md)
 - [Backend README](./backend/README.md)
 
